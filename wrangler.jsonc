@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "contenthub-team",
+  "name": "contenthub",
   "compatibility_date": "2026-07-26",
   "assets": {
     "directory": "./dist",
