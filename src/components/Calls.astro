@@ -1,0 +1,254 @@
+---
+import Avatar from './Avatar.astro';
+import { people } from '../conversation.js';
+
+/**
+ * The shared screen is the same nginx config the thread was about, so the call
+ * reads as part of one story rather than a stock screenshot.
+ */
+const configLines = [
+  { text: 'server {', tone: 'plain' },
+  { text: '  server_name staging.internal;', tone: 'dim' },
+  { text: '  client_max_body_size 32m;', tone: 'bad' },
+  { text: '}', tone: 'plain' },
+  { text: '', tone: 'plain' },
+  { text: 'server {', tone: 'plain' },
+  { text: '  server_name hub.internal;', tone: 'dim' },
+  { text: '  client_max_body_size 512m;', tone: 'good' },
+  { text: '}', tone: 'plain' },
+];
+---
+
+<section class="section" id="calls">
+  <div class="container">
+    <div class="split">
+      <div class="split-copy reveal">
+        <span class="eyebrow">Calls & screen sharing</span>
+        <h2>Video that never leaves your network</h2>
+        <p>
+          Calls run through a mediasoup SFU and a coturn TURN server that you deploy
+          alongside everything else. Media is relayed by your own containers, so a call
+          between two people in your office does not transit anyone else's cloud.
+        </p>
+        <ul class="split-list">
+          <li>Group video and audio, with screen sharing per monitor or per window</li>
+          <li>A device check before you join, so the wrong microphone is caught early</li>
+          <li>
+            Calls survive navigation — moving to another channel shrinks the call into a
+            draggable mini-player instead of dropping it
+          </li>
+          <li>Ring, answer and decline from the desktop client's own notifications</li>
+          <li>A short quality rating after each call, kept with the call record</li>
+        </ul>
+      </div>
+
+      <!-- Decorative mock (MANIFEST §8.3); the capabilities are listed in text. -->
+      <div class="split-media reveal" aria-hidden="true">
+        <div class="window call-win">
+          <div class="window-bar">
+            <span class="window-dots"><i></i><i></i><i></i></span>
+            <span class="window-title">Release 2.4 — upload limits</span>
+            <span class="tag-demo">Demo</span>
+          </div>
+
+          <div class="stage">
+            <div class="share">
+              <p class="share-label">
+                <span class="share-dot"></span>
+                {people.ali.first} is sharing · nginx.conf
+              </p>
+              <pre class="code">{configLines.map((l) => (
+  <span class={`ln ln-${l.tone}`}>{l.text || ' '}</span>
+))}</pre>
+            </div>
+
+            <div class="tiles">
+              {
+                [people.ali, people.mina, people.sara].map((person, idx) => (
+                  <div class={`tile${idx === 0 ? ' is-speaking' : ''}`}>
+                    <Avatar person={person} />
+                    <p class="tile-name">
+                      {person.first}
+                      {idx === 2 && <span class="muted-ic">muted</span>}
+                    </p>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+
+          <div class="callbar">
+            <span class="cb cb-on">Mic</span>
+            <span class="cb cb-on">Camera</span>
+            <span class="cb cb-active">Sharing</span>
+            <span class="cb cb-end">Leave</span>
+            <span class="cb-timer">06:12</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .call-win {
+    font-size: 0.82rem;
+  }
+
+  .stage {
+    display: grid;
+    gap: 10px;
+    padding: 12px;
+    background: var(--surface);
+  }
+
+  /* ── shared screen ── */
+  .share {
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    overflow: hidden;
+  }
+
+  .share-label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 11px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-3);
+  }
+
+  .share-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--mint);
+    flex: none;
+  }
+
+  .code {
+    margin: 0;
+    padding: 11px 13px;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    line-height: 1.62;
+    overflow-x: auto;
+    display: grid;
+  }
+
+  .ln {
+    white-space: pre;
+  }
+
+  .ln-plain {
+    color: var(--text-2);
+  }
+
+  .ln-dim {
+    color: var(--text-3);
+  }
+
+  .ln-bad {
+    color: var(--danger);
+    background: var(--danger-soft);
+    border-radius: 4px;
+  }
+
+  .ln-good {
+    color: var(--mint);
+    background: var(--mint-soft);
+    border-radius: 4px;
+  }
+
+  /* ── participant tiles ── */
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .tile {
+    position: relative;
+    display: grid;
+    place-items: center;
+    gap: 7px;
+    padding: 15px 8px 11px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .tile.is-speaking {
+    border-color: var(--mint);
+    box-shadow: 0 0 0 1px var(--mint) inset;
+  }
+
+  .tile-name {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-2);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .muted-ic {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    border: 1px solid var(--border-strong);
+    border-radius: 4px;
+    padding: 0 4px;
+  }
+
+  /* ── call bar ── */
+  .callbar {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 11px 13px;
+    border-top: 1px solid var(--border);
+    background: var(--surface-2);
+    flex-wrap: wrap;
+  }
+
+  .cb {
+    padding: 5px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-2);
+  }
+
+  .cb-active {
+    border-color: color-mix(in srgb, var(--mint) 50%, transparent);
+    background: var(--mint-soft);
+    color: var(--mint);
+  }
+
+  .cb-end {
+    border-color: var(--danger-line);
+    background: var(--danger-soft);
+    color: var(--danger);
+  }
+
+  .cb-timer {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 420px) {
+    .cb-timer {
+      margin-left: 0;
+    }
+  }
+</style>

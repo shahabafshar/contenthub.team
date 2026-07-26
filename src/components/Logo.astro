@@ -1,0 +1,57 @@
+---
+/**
+ * ContentHub mark — the three stacked content cards from the app's own
+ * `frontend/public/icon.svg`, redrawn at a size that stays legible in a 20px
+ * header and a favicon (MANIFEST §7.5). Gradient IDs are suffixed so several
+ * instances on one page cannot collide.
+ */
+interface Props {
+  size?: number;
+  id?: string;
+  withWordmark?: boolean;
+}
+
+const { size = 28, id = 'logo', withWordmark = false } = Astro.props;
+const grad = `chGrad-${id}`;
+---
+
+<span class="logo">
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 512 512"
+    role="img"
+    aria-label="ContentHub"
+    focusable="false">
+    <defs>
+      <linearGradient id={grad} x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#4338ca"></stop>
+        <stop offset="100%" stop-color="#7c3aed"></stop>
+      </linearGradient>
+    </defs>
+    <rect width="512" height="512" rx="112" fill={`url(#${grad})`}></rect>
+    <rect x="104" y="120" width="264" height="196" rx="26" fill="#ffffff" fill-opacity="0.28"
+    ></rect>
+    <rect x="146" y="158" width="264" height="196" rx="26" fill="#ffffff" fill-opacity="0.56"
+    ></rect>
+    <rect x="188" y="196" width="264" height="196" rx="26" fill="#ffffff"></rect>
+    <circle cx="326" cy="300" r="15" fill="#7c3aed"></circle>
+    <circle cx="382" cy="300" r="15" fill="#4338ca" fill-opacity="0.68"></circle>
+    <circle cx="438" cy="300" r="15" fill="#4338ca" fill-opacity="0.36"></circle>
+  </svg>
+  {withWordmark && <span class="logo-word">ContentHub</span>}
+</span>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-word {
+    font-size: 1.06rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+</style>

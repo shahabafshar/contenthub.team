@@ -1,0 +1,287 @@
+---
+/**
+ * Architecture artwork, built as a system (MANIFEST §7.2): every node is the same
+ * chip component, tiers share one grid, and the connectors are CSS rules rather
+ * than hand-placed strokes — so it stays legible on a phone, adapts to both colour
+ * schemes for free, and contains no stroke-into-circle shapes to misread (§7.4).
+ *
+ * Every service named here is one the project actually deploys.
+ */
+const tiers = [
+  {
+    label: 'Clients',
+    nodes: [
+      { name: 'Desktop client', meta: 'Electron', tone: 'brand' },
+      { name: 'Browser', meta: 'React + Vite', tone: 'brand' },
+    ],
+  },
+  {
+    label: 'Edge',
+    nodes: [{ name: 'Reverse proxy', meta: 'nginx · TLS', tone: 'plain' }],
+  },
+  {
+    label: 'Application',
+    nodes: [
+      { name: 'Django + Channels', meta: 'ASGI · HTTP + WebSocket', tone: 'accent' },
+      { name: 'Background worker', meta: 'Celery + beat', tone: 'accent' },
+    ],
+  },
+  {
+    label: 'State & search',
+    nodes: [
+      { name: 'PostgreSQL', meta: 'messages, docs, users', tone: 'plain' },
+      { name: 'Redis', meta: 'presence · sockets · queue', tone: 'plain' },
+      { name: 'Meilisearch', meta: 'full-text index', tone: 'plain' },
+    ],
+  },
+  {
+    label: 'Media',
+    nodes: [
+      { name: 'mediasoup SFU', meta: 'call routing', tone: 'mint' },
+      { name: 'coturn', meta: 'TURN / NAT traversal', tone: 'mint' },
+    ],
+  },
+];
+
+const requirements = [
+  'A host with Docker and Docker Compose',
+  'A TLS certificate — the browser will not grant camera or microphone access without one',
+  'A UDP port range open for call media, plus TURN on 3478 and 5349',
+  'An OpenID Connect provider if you want single sign-on; it ships wired to Authentik',
+];
+---
+
+<section class="section" id="self-hosted">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Self-hosting</span>
+      <h2>One compose file, and nothing that phones home</h2>
+      <p>
+        Every part of ContentHub runs on your own hardware — including the parts most
+        self-hosted chat tools hand off to a third party, like call routing and search.
+      </p>
+    </div>
+
+    <div class="layout">
+      <div class="rack reveal">
+        <p class="rack-label">
+          <span class="rack-dot" aria-hidden="true"></span>
+          Your infrastructure
+        </p>
+
+        <div class="tiers">
+          {
+            tiers.map((tier, ti) => (
+              <div class="tier">
+                <p class="tier-label">{tier.label}</p>
+                <div class="nodes">
+                  {tier.nodes.map((n) => (
+                    <div class={`node node-${n.tone}`}>
+                      <p class="node-name">{n.name}</p>
+                      <p class="node-meta">{n.meta}</p>
+                    </div>
+                  ))}
+                </div>
+                {ti < tiers.length - 1 && <span class="link" aria-hidden="true" />}
+              </div>
+            ))
+          }
+        </div>
+
+        <p class="rack-foot">
+          Signs in against <strong>your</strong> OpenID Connect provider — accounts never
+          leave your directory.
+        </p>
+      </div>
+
+      <div class="notes reveal">
+        <h3>What you need</h3>
+        <ul class="split-list">
+          {requirements.map((r) => <li>{r}</li>)}
+        </ul>
+
+        <div class="callout">
+          <h4>No SaaS in the critical path</h4>
+          <p>
+            Search, presence, push notifications, call signalling and media relay are all
+            services you deploy. Nothing phones home, and there is no vendor who can read
+            your messages — because there is no vendor.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: 48px;
+    align-items: start;
+  }
+
+  /* ── the rack ── */
+  .rack {
+    position: relative;
+    padding: 22px;
+    border-radius: var(--radius);
+    border: 1px dashed var(--border-strong);
+    background:
+      radial-gradient(120% 70% at 50% 0%, var(--accent-soft), transparent 62%),
+      var(--surface);
+  }
+
+  .rack-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 18px;
+  }
+
+  .rack-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--mint);
+    flex: none;
+  }
+
+  .tiers {
+    display: grid;
+    gap: 0;
+  }
+
+  .tier {
+    position: relative;
+    padding-bottom: 26px;
+  }
+
+  .tier:last-child {
+    padding-bottom: 0;
+  }
+
+  .tier-label {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 8px;
+  }
+
+  .nodes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 9px;
+  }
+
+  /* Connector between tiers: one short vertical rule, centred. No arrowheads and
+     no circular terminals — see the note in the frontmatter. */
+  .link {
+    position: absolute;
+    left: 50%;
+    bottom: 7px;
+    width: 2px;
+    height: 12px;
+    transform: translateX(-50%);
+    border-radius: 2px;
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--accent) 55%, transparent),
+      transparent
+    );
+  }
+
+  .node {
+    padding: 11px 13px;
+    border-radius: 10px;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-raised);
+    min-width: 0;
+  }
+
+  .node-name {
+    font-size: 0.86rem;
+    font-weight: 700;
+    letter-spacing: -0.012em;
+    line-height: 1.3;
+  }
+
+  .node-meta {
+    margin-top: 2px;
+    font-size: 0.74rem;
+    color: var(--text-3);
+    line-height: 1.4;
+  }
+
+  .node-brand {
+    border-color: color-mix(in srgb, var(--violet) 48%, transparent);
+    background: color-mix(in srgb, var(--violet) 11%, var(--bg-raised));
+  }
+
+  .node-accent {
+    border-color: color-mix(in srgb, var(--accent) 52%, transparent);
+    background: color-mix(in srgb, var(--accent) 12%, var(--bg-raised));
+  }
+
+  .node-mint {
+    border-color: color-mix(in srgb, var(--mint) 46%, transparent);
+    background: color-mix(in srgb, var(--mint) 11%, var(--bg-raised));
+  }
+
+  .rack-foot {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 0.86rem;
+    color: var(--text-2);
+  }
+
+  .rack-foot strong {
+    color: var(--text);
+  }
+
+  /* ── notes column ── */
+  .notes h3 {
+    font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
+
+  .notes .split-list {
+    margin-top: 18px;
+  }
+
+  .callout {
+    margin-top: 28px;
+    padding: 20px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .callout h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  .callout p {
+    margin-top: 8px;
+    font-size: 0.92rem;
+    color: var(--text-2);
+    line-height: 1.62;
+  }
+
+  @media (max-width: 980px) {
+    .layout {
+      grid-template-columns: 1fr;
+      gap: 36px;
+    }
+  }
+</style>

@@ -1,0 +1,15 @@
+---
+/**
+ * Renders demo copy with single-backtick inline code, so the example in
+ * `src/conversation.js` stays plain data instead of embedded markup.
+ * Splits on backticks and lets Astro escape every segment — no set:html.
+ */
+interface Props {
+  text: string;
+}
+
+const { text } = Astro.props;
+const parts = text.split('`');
+---
+
+{parts.map((part, i) => (i % 2 === 1 ? <code>{part}</code> : <Fragment>{part}</Fragment>))}

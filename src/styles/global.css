@@ -1,0 +1,497 @@
+/* ══ Design tokens ═════════════════════════════════════════════
+   Brand colours are ContentHub's own: the app icon is an indigo→violet
+   gradient (#4338ca → #7c3aed) and the PWA theme colour is #4338ca.
+   Mint is the signal colour — presence, "live", resolved.            */
+:root {
+  --bg: #09090f;
+  --bg-raised: #0e0e18;
+  --surface: #14141f;
+  --surface-2: #1b1b29;
+  --surface-3: #232335;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text: #f2f2f7;
+  --text-2: #a6a8b8;
+  --text-3: #7e819a;
+
+  --accent: #6366f1;
+  --accent-2: #818cf8;
+  --violet: #8b5cf6;
+  --mint: #2dd4bf;
+  --amber: #fbbf24;
+  --danger: #fca5a5;
+  --accent-soft: rgba(99, 102, 241, 0.16);
+  --mint-soft: rgba(45, 212, 191, 0.15);
+  --danger-soft: rgba(248, 113, 113, 0.14);
+  --danger-line: rgba(248, 113, 113, 0.5);
+
+  --grad-brand: linear-gradient(100deg, var(--accent-2), var(--violet) 60%, #c084fc);
+  --grad-icon: linear-gradient(135deg, #4338ca, #7c3aed);
+
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 7px;
+  --shadow-card: 0 26px 64px -26px rgba(0, 0, 0, 0.7);
+  --shadow-soft: 0 12px 32px -18px rgba(0, 0, 0, 0.55);
+
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #fbfbfe;
+    --bg-raised: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f4f4fa;
+    --surface-3: #eaeaf5;
+    --border: rgba(18, 18, 45, 0.1);
+    --border-strong: rgba(18, 18, 45, 0.17);
+    --text: #141426;
+    --text-2: #4c4e60;
+    --text-3: #686b82;
+
+    --accent: #4f46e5;
+    --accent-2: #6366f1;
+    --violet: #7c3aed;
+    --mint: #0f9e8e;
+    --amber: #b4780a;
+    /* The dark scheme's pale red is unreadable on a light background. */
+    --danger: #b91c1c;
+    --accent-soft: rgba(79, 70, 229, 0.1);
+    --mint-soft: rgba(15, 158, 142, 0.13);
+    --danger-soft: rgba(185, 28, 28, 0.1);
+    --danger-line: rgba(185, 28, 28, 0.35);
+
+    --grad-brand: linear-gradient(100deg, #4338ca, #7c3aed 60%, #a855f7);
+    --shadow-card: 0 24px 54px -28px rgba(30, 27, 90, 0.28);
+    --shadow-soft: 0 12px 28px -20px rgba(30, 27, 90, 0.26);
+  }
+}
+
+/* ══ Reset / base ══════════════════════════════════════════════ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img,
+svg {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 0.88em;
+  padding: 0.1em 0.36em;
+  border-radius: 5px;
+  background: var(--accent-soft);
+  color: var(--accent-2);
+  word-break: break-word;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  z-index: 200;
+  padding: 10px 18px;
+  border-radius: 0 0 10px 10px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 0.18s ease;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ══ Layout helpers ════════════════════════════════════════════ */
+.container {
+  max-width: 1160px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+.section {
+  padding-block: 92px;
+}
+
+.section-tight {
+  padding-block: 66px;
+}
+
+/* Keep anchor targets clear of the sticky header. */
+section[id],
+main[id] {
+  scroll-margin-top: 96px;
+}
+
+.section-head {
+  max-width: 680px;
+  margin: 0 auto 56px;
+  text-align: center;
+}
+
+.section-head h2 {
+  font-size: clamp(1.7rem, 3.4vw, 2.45rem);
+  font-weight: 800;
+  letter-spacing: -0.028em;
+  line-height: 1.18;
+}
+
+.section-head p {
+  margin-top: 15px;
+  color: var(--text-2);
+  font-size: 1.06rem;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background: var(--grad-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 13px;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 60px;
+}
+
+.split-copy h2,
+.split-copy h3 {
+  font-size: clamp(1.5rem, 2.9vw, 2.1rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.split-copy p {
+  margin-top: 15px;
+  color: var(--text-2);
+  font-size: 1.03rem;
+}
+
+.split-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 22px;
+  display: grid;
+  gap: 12px;
+}
+
+.split-list li {
+  position: relative;
+  padding-left: 28px;
+  color: var(--text-2);
+  font-size: 0.96rem;
+}
+
+.split-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.6em;
+  width: 13px;
+  height: 13px;
+  border-radius: 4px;
+  background: var(--grad-brand);
+  opacity: 0.9;
+}
+
+@media (max-width: 900px) {
+  .split {
+    grid-template-columns: 1fr;
+    gap: 38px;
+  }
+
+  .split-media {
+    order: -1;
+  }
+}
+
+/* ══ Buttons ═══════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 11px 22px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.97rem;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 8px 24px -10px rgba(79, 70, 229, 0.7);
+}
+
+.btn-primary:hover {
+  background: var(--accent-2);
+  box-shadow: 0 10px 30px -10px rgba(79, 70, 229, 0.9);
+}
+
+.btn-ghost {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.btn-ghost:hover {
+  background: var(--surface-2);
+}
+
+.btn-lg {
+  padding: 15px 30px;
+  font-size: 1.05rem;
+  border-radius: 12px;
+}
+
+.btn svg {
+  flex: none;
+}
+
+/* ══ Shared app chrome ═════════════════════════════════════════
+   The mock ContentHub window used by several sections. It always carries
+   a "Demo" tag — it is not real product output (MANIFEST §1.6).      */
+.window {
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  background: var(--bg-raised);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.window-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.window-dots {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+
+.window-dots i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+
+.window-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tag-demo {
+  flex: none;
+  margin-left: auto;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  color: var(--text-3);
+  background: var(--surface);
+  white-space: nowrap;
+}
+
+/* ══ Avatars ═══════════════════════════════════════════════════
+   Initials on a two-stop disc, hue per person. Deliberately geometric —
+   no figures, so no composition hazard to review (MANIFEST §7.4).   */
+.avatar {
+  position: relative;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.71rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background-image: linear-gradient(
+    140deg,
+    hsl(var(--hue) 62% 60%),
+    hsl(calc(var(--hue) + 26) 58% 43%)
+  );
+  user-select: none;
+}
+
+.avatar-sm {
+  width: 26px;
+  height: 26px;
+  font-size: 0.58rem;
+}
+
+.avatar-bot {
+  background-image: none;
+  background-color: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  color: var(--accent-2);
+}
+
+.avatar[data-presence]::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-raised);
+  background: var(--text-3);
+}
+
+.avatar[data-presence="online"]::after {
+  background: var(--mint);
+}
+
+.avatar[data-presence="away"]::after {
+  background: var(--amber);
+}
+
+.avatar-sm[data-presence]::after {
+  width: 8px;
+  height: 8px;
+}
+
+/* ══ Pills ═════════════════════════════════════════════════════ */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.pill-live {
+  border-color: color-mix(in srgb, var(--mint) 45%, transparent);
+  background: var(--mint-soft);
+  color: var(--mint);
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+/* ══ Scroll reveal ═════════════════════════════════════════════
+   Opt-in: hidden only once JS has confirmed it can reveal them, so the
+   page is fully readable with scripting off (MANIFEST §8.1).        */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.js .reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ══ Motion preferences ════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

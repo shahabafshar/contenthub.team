@@ -1,0 +1,88 @@
+---
+import Logo from './Logo.astro';
+import { primaryPlatform, downloadUrl } from '../site.js';
+
+const href = primaryPlatform ? downloadUrl(primaryPlatform) : '#download';
+---
+
+<header>
+  <div class="container bar">
+    <a class="brand" href="/" aria-label="ContentHub home">
+      <Logo size={26} id="hdr" withWordmark />
+    </a>
+
+    <nav aria-label="Sections">
+      <a href="#conversation">How it works</a>
+      <a href="#calls">Calls</a>
+      <a href="#self-hosted">Self-hosting</a>
+      <a href="#download">Download</a>
+    </nav>
+
+    <a class="btn btn-primary btn-sm" href={href} data-track="header-download">
+      <svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+        <path d="M12 3a1 1 0 0 1 1 1v9.6l3.3-3.3a1 1 0 0 1 1.4 1.4l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 0 1 1.4-1.4L11 13.6V4a1 1 0 0 1 1-1Z"></path>
+        <path d="M4 19a1 1 0 0 1 1-1h14a1 1 0 0 1 0 2H5a1 1 0 0 1-1-1Z"></path>
+      </svg>
+      Download
+    </a>
+  </div>
+</header>
+
+<style>
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: saturate(1.6) blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    height: 66px;
+  }
+
+  .brand {
+    text-decoration: none;
+    flex: none;
+  }
+
+  nav {
+    margin-left: auto;
+    display: flex;
+    gap: 26px;
+  }
+
+  nav a {
+    font-size: 0.93rem;
+    font-weight: 500;
+    color: var(--text-2);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  nav a:hover {
+    color: var(--text);
+  }
+
+  .btn-sm {
+    flex: none;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+
+  /* Below the nav breakpoint the section links collapse; the page is short
+     enough to scroll, and the download CTA — the point of the header — stays. */
+  @media (max-width: 860px) {
+    nav {
+      display: none;
+    }
+
+    .btn-sm {
+      margin-left: auto;
+    }
+  }
+</style>

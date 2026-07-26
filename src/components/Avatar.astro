@@ -1,0 +1,26 @@
+---
+/** Initials disc. Decorative: the author's name is always in adjacent text. */
+interface Props {
+  person: {
+    name: string;
+    initials: string;
+    hue?: number;
+    bot?: boolean;
+    presence?: string;
+  };
+  size?: 'sm' | 'md';
+  showPresence?: boolean;
+}
+
+const { person, size = 'md', showPresence = false } = Astro.props;
+const cls = ['avatar', size === 'sm' && 'avatar-sm', person.bot && 'avatar-bot']
+  .filter(Boolean)
+  .join(' ');
+---
+
+<span
+  class={cls}
+  style={person.hue != null ? `--hue:${person.hue}` : undefined}
+  data-presence={showPresence ? person.presence : undefined}
+  aria-hidden="true">{person.initials}</span
+>

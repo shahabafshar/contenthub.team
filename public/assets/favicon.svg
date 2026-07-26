@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="ContentHub">
+  <!--
+    Favicon variant of the ContentHub mark. The app icon stacks three cards with
+    three accent dots; at 16px that dissolves into a blob (MANIFEST §7.5), so this
+    version keeps two cards at higher contrast and drops the dots entirely.
+  -->
+  <defs>
+    <linearGradient id="fbg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4338ca"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#fbg)"/>
+  <rect x="96" y="128" width="272" height="200" rx="34" fill="#ffffff" fill-opacity="0.45"/>
+  <rect x="164" y="196" width="272" height="200" rx="34" fill="#ffffff"/>
+</svg>

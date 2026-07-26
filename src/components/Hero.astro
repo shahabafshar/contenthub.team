@@ -1,0 +1,466 @@
+---
+import Logo from './Logo.astro';
+import Avatar from './Avatar.astro';
+import { people, workspace } from '../conversation.js';
+import { primaryPlatform, downloadUrl, desktopVersion } from '../site.js';
+
+const dl = primaryPlatform ? downloadUrl(primaryPlatform) : '#download';
+---
+
+<section class="hero">
+  <div class="container">
+    <div class="grid">
+      <div class="copy">
+        <span class="pill pill-live"><i class="dot"></i> Desktop client v{desktopVersion}</span>
+
+        <h1>Your team's hub. <span>On your own servers.</span></h1>
+
+        <p class="lead">
+          Chat, threads, video calls, shared documents and an AI assistant — one
+          application your team signs into with your own identity provider, running on
+          hardware you control. No seats to buy, no tenant somewhere else.
+        </p>
+
+        <div class="actions">
+          <a class="btn btn-primary btn-lg" href={dl} data-track="hero-download">
+            <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+              <path
+                d="M12 3a1 1 0 0 1 1 1v9.6l3.3-3.3a1 1 0 0 1 1.4 1.4l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 0 1 1.4-1.4L11 13.6V4a1 1 0 0 1 1-1Z"
+              ></path>
+              <path d="M4 19a1 1 0 0 1 1-1h14a1 1 0 0 1 0 2H5a1 1 0 0 1-1-1Z"></path>
+            </svg>
+            Download for {primaryPlatform ? primaryPlatform.name : 'desktop'}
+          </a>
+          <a class="btn btn-ghost btn-lg" href="#conversation">Watch it work</a>
+        </div>
+
+        <p class="fine">
+          {primaryPlatform?.size} · portable, no installer. <a href="#download"
+            >Other platforms</a
+          >
+        </p>
+      </div>
+
+      <!-- Decorative mock of the desktop client (MANIFEST §8.3): the meaning is
+           carried by the copy above and the sections below. -->
+      <div class="art" aria-hidden="true">
+        <div class="window app">
+          <div class="window-bar">
+            <span class="window-dots"><i></i><i></i><i></i></span>
+            <span class="window-title"><Logo size={13} id="hero" /> ContentHub</span>
+            <span class="tag-demo">Demo</span>
+          </div>
+
+          <div class="app-body">
+            <aside class="rail">
+              <p class="rail-ws">{workspace.name}</p>
+              <p class="rail-group">Channels</p>
+              <ul>
+                <li class="is-active"><span># {workspace.channel}</span><b>3</b></li>
+                <li><span># infra</span></li>
+                <li><span># design-review</span><b>1</b></li>
+                <li><span># announcements</span></li>
+              </ul>
+              <p class="rail-group">Direct</p>
+              <ul>
+                <li><Avatar person={people.ali} size="sm" showPresence /><span>Ali</span></li>
+                <li><Avatar person={people.sara} size="sm" showPresence /><span>Sara</span></li>
+              </ul>
+            </aside>
+
+            <div class="pane">
+              <div class="pane-head">
+                <span class="pane-title"># {workspace.channel}</span>
+                <span class="pane-meta">{workspace.members} members</span>
+              </div>
+
+              <div class="pane-msgs">
+                <div class="m">
+                  <Avatar person={people.mina} size="sm" />
+                  <div>
+                    <p class="m-who">{people.mina.first} <i>09:12</i></p>
+                    <p class="m-body">
+                      Uploads over about 40 MB fail at 100% — the bar completes, the
+                      document never appears.
+                    </p>
+                  </div>
+                </div>
+                <div class="m">
+                  <Avatar person={people.ali} size="sm" />
+                  <div>
+                    <p class="m-who">{people.ali.first} <i>09:16</i></p>
+                    <p class="m-body">
+                      Found it — the staging proxy caps the body at 32 MB.
+                    </p>
+                    <p class="m-thread">3 replies</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="composer"><span>Message # {workspace.channel}</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- v0.3.0's headline desktop feature: a rich native call notification. -->
+        <div class="notif">
+          <div class="notif-top">
+            <Avatar person={people.ali} />
+            <div class="notif-txt">
+              <p class="notif-title">{people.ali.name}</p>
+              <p class="notif-sub">Incoming call · # {workspace.channel}</p>
+            </div>
+          </div>
+          <div class="notif-actions">
+            <span class="na na-yes">Answer</span>
+            <span class="na na-no">Decline</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    padding-block: clamp(52px, 7vw, 96px) clamp(56px, 5.5vw, 74px);
+    overflow: hidden;
+  }
+
+  /* Brand wash behind the fold. */
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: -35% -10% auto -10%;
+    height: 130%;
+    background:
+      radial-gradient(46% 40% at 76% 16%, rgba(124, 58, 237, 0.2), transparent 70%),
+      radial-gradient(44% 38% at 14% 6%, rgba(67, 56, 202, 0.22), transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.04fr) minmax(0, 1fr);
+    gap: 52px;
+    align-items: center;
+  }
+
+  h1 {
+    margin-top: 18px;
+    font-size: clamp(2.05rem, 4.4vw, 3.1rem);
+    font-weight: 800;
+    letter-spacing: -0.033em;
+    line-height: 1.08;
+  }
+
+  /* Breaks between the two sentences instead of orphaning "On" at the end of
+     line one. An inline-block moves to the next line whole rather than being
+     split, and still wraps internally if the column gets very narrow. */
+  h1 span {
+    display: inline-block;
+  }
+
+  .lead {
+    margin-top: 20px;
+    max-width: 33em;
+    color: var(--text-2);
+    font-size: clamp(1.02rem, 1.5vw, 1.13rem);
+  }
+
+  .actions {
+    margin-top: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .fine {
+    margin-top: 16px;
+    font-size: 0.87rem;
+    color: var(--text-3);
+  }
+
+  .fine a {
+    color: var(--accent-2);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .fine a:hover {
+    text-decoration: underline;
+  }
+
+  /* ── mock app ── */
+  .art {
+    position: relative;
+  }
+
+  .app {
+    font-size: 0.8rem;
+  }
+
+  .window-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .app-body {
+    display: grid;
+    grid-template-columns: 132px minmax(0, 1fr);
+    min-height: 292px;
+  }
+
+  .rail {
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+    padding: 12px 10px;
+  }
+
+  .rail-ws {
+    font-weight: 700;
+    font-size: 0.76rem;
+    letter-spacing: -0.01em;
+    padding-inline: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .rail-group {
+    margin-top: 14px;
+    margin-bottom: 5px;
+    padding-inline: 6px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+
+  .rail ul {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 1px;
+  }
+
+  .rail li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 6px;
+    border-radius: 6px;
+    font-size: 0.73rem;
+    color: var(--text-2);
+    line-height: 1.3;
+  }
+
+  .rail li span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .rail li.is-active {
+    background: var(--accent-soft);
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .rail li b {
+    margin-left: auto;
+    font-size: 0.6rem;
+    min-width: 16px;
+    height: 16px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .pane {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .pane-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .pane-title {
+    font-weight: 700;
+    font-size: 0.82rem;
+  }
+
+  .pane-meta {
+    font-size: 0.7rem;
+    color: var(--text-3);
+  }
+
+  .pane-msgs {
+    padding: 14px;
+    display: grid;
+    gap: 15px;
+    flex: 1;
+    align-content: start;
+  }
+
+  .m {
+    display: flex;
+    gap: 9px;
+    min-width: 0;
+  }
+
+  .m-who {
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .m-who i {
+    font-style: normal;
+    font-weight: 500;
+    color: var(--text-3);
+    margin-left: 5px;
+    font-size: 0.66rem;
+  }
+
+  .m-body {
+    margin-top: 2px;
+    font-size: 0.76rem;
+    color: var(--text-2);
+    line-height: 1.5;
+  }
+
+  .m-thread {
+    margin-top: 6px;
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--accent-2);
+  }
+
+  .composer {
+    margin: 0 14px 14px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    font-size: 0.72rem;
+    color: var(--text-3);
+  }
+
+  /* ── native notification card ── */
+  .notif {
+    position: absolute;
+    right: -18px;
+    /* Clear of the composer row, so the app window stays fully readable
+       underneath the notification. */
+    bottom: -52px;
+    width: 236px;
+    padding: 12px;
+    border-radius: 13px;
+    border: 1px solid var(--border-strong);
+    background: color-mix(in srgb, var(--surface-2) 94%, transparent);
+    backdrop-filter: blur(8px);
+    box-shadow: var(--shadow-card);
+    animation: notif-in 0.7s cubic-bezier(0.16, 0.84, 0.3, 1) 0.5s both;
+  }
+
+  @keyframes notif-in {
+    from {
+      opacity: 0;
+      transform: translate(14px, 10px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .notif-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .notif-txt {
+    min-width: 0;
+  }
+
+  .notif-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .notif-sub {
+    font-size: 0.7rem;
+    color: var(--text-3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .notif-actions {
+    margin-top: 11px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+  }
+
+  .na {
+    text-align: center;
+    padding: 6px 0;
+    border-radius: 7px;
+    font-size: 0.73rem;
+    font-weight: 600;
+  }
+
+  .na-yes {
+    background: var(--mint);
+    color: #04231f;
+  }
+
+  .na-no {
+    border: 1px solid var(--border-strong);
+    color: var(--text-2);
+  }
+
+  @media (max-width: 980px) {
+    .grid {
+      grid-template-columns: 1fr;
+      gap: 46px;
+    }
+
+    .art {
+      max-width: 560px;
+    }
+  }
+
+  /* The notification overhangs the window; on narrow screens tuck it inside so
+     it cannot push past the viewport edge. */
+  @media (max-width: 560px) {
+    .notif {
+      position: static;
+      width: auto;
+      margin-top: 16px;
+      animation: none;
+    }
+
+    .app-body {
+      grid-template-columns: 108px minmax(0, 1fr);
+    }
+  }
+</style>

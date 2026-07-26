@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout
+  title="Page not found — ContentHub"
+  description="That page does not exist on contenthub.team."
+  noindex>
+  <Header />
+  <main id="main" class="section container wrap">
+    <p class="eyebrow">404</p>
+    <h1>Nothing filed here</h1>
+    <p class="lead">
+      This address does not match a page on the site. The channel you are after may be
+      inside a hub rather than out here.
+    </p>
+    <div class="acts">
+      <a class="btn btn-primary btn-lg" href="/">Back to the homepage</a>
+      <a class="btn btn-ghost btn-lg" href="/#download">Download the desktop client</a>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .wrap {
+    max-width: 620px;
+    padding-block: 120px 130px;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+  }
+
+  .lead {
+    margin-top: 16px;
+    color: var(--text-2);
+    font-size: 1.05rem;
+  }
+
+  .acts {
+    margin-top: 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+</style>

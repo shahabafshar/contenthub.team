@@ -1,0 +1,153 @@
+---
+/** Meets MANIFEST §9 (SEO) and §8.1 (progressive enhancement). */
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  imageAlt?: string;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description,
+  image = '/og.jpg',
+  imageAlt = "ContentHub — \"Your team's hub. On your own servers.\" beside a channel conversation showing a threaded reply and a call in progress",
+  noindex = false,
+} = Astro.props;
+
+const site = Astro.site ?? new URL('https://contenthub.team');
+const canonical = new URL(Astro.url.pathname, site).href.replace(/(.)\/$/, '$1');
+const imageUrl = new URL(image, site).href;
+
+// MANIFEST §9: only verifiable fields, and only capabilities that are actually
+// implemented. Nothing from the unstarted enterprise phase (audit trails,
+// retention, DLP, end-to-end encryption, guest access) is claimed here.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${site.origin}/#website`,
+      url: `${site.origin}/`,
+      name: 'ContentHub',
+      description,
+      inLanguage: 'en',
+    },
+    {
+      '@type': 'SoftwareApplication',
+      '@id': `${site.origin}/#app`,
+      name: 'ContentHub',
+      url: `${site.origin}/`,
+      applicationCategory: 'CommunicationApplication',
+      operatingSystem: 'Windows, Web browser',
+      softwareVersion: '0.3.0',
+      description,
+      image: imageUrl,
+      featureList: [
+        'Real-time channel and direct messaging over WebSocket',
+        'Threaded replies, reactions and read receipts',
+        'Group video calls and screen sharing through a self-hosted SFU',
+        'Full-text message search',
+        'An AI assistant that can call tools and read attachments',
+        'Documents, pages, announcements and shared lists',
+        'Single sign-on over OpenID Connect',
+        'Self-hosted with Docker Compose',
+      ],
+    },
+  ],
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta
+      name="robots"
+      content={noindex
+        ? 'noindex, follow'
+        : 'index, follow, max-image-preview:large, max-snippet:-1'}
+    />
+
+    <meta name="theme-color" content="#fbfbfe" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#09090f" media="(prefers-color-scheme: dark)" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ContentHub" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imageAlt} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
+    <meta name="twitter:image:alt" content={imageAlt} />
+
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+    <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />
+
+    <script is:inline>
+      // MANIFEST §8.1 — every hiding style is scoped to `.js`, so nothing is
+      // hidden when scripting is unavailable. Never remove this.
+      document.documentElement.classList.add('js');
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <slot />
+
+    <script>
+      // Reveal sections as they enter the viewport.
+      const items = document.querySelectorAll('.reveal');
+      const showAll = () => items.forEach((el) => el.classList.add('is-in'));
+      if (
+        matchMedia('(prefers-reduced-motion: reduce)').matches ||
+        !('IntersectionObserver' in window)
+      ) {
+        showAll();
+      } else {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add('is-in');
+              io.unobserve(entry.target);
+            });
+          },
+          // threshold 0: percentage thresholds are unreliable for elements
+          // taller than the viewport (MANIFEST §8.2).
+          { threshold: 0, rootMargin: '0px 0px -50px' }
+        );
+        items.forEach((el, i) => {
+          el.style.transitionDelay = `${Math.min(i % 4, 3) * 70}ms`;
+          io.observe(el);
+        });
+      }
+    </script>
+  </body>
+</html>

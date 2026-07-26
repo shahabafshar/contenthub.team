@@ -1,0 +1,878 @@
+---
+import Avatar from './Avatar.astro';
+import Rich from './Rich.astro';
+import { people, workspace, stream } from '../conversation.js';
+
+/**
+ * The page's main demo. Every beat is server-rendered in document order and the
+ * step engine simply reveals `[data-beat]` elements one at a time — so with
+ * scripting off the whole transcript is present and readable (MANIFEST §8.1),
+ * and the controls, which would be inert without JS, are not rendered at all.
+ */
+const p = (key) => people[key];
+---
+
+<section class="section" id="conversation">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">One morning in a channel</span>
+      <h2>A bug reported, diagnosed, and written up — without leaving the app</h2>
+      <p>
+        Everything below is one continuous conversation: the report, the fix found in a
+        thread, the assistant auditing the codebase with its own tools, the call that
+        settled it, and the release note it produced.
+      </p>
+    </div>
+
+    <div class="demo reveal" data-demo>
+      <div class="window">
+        <div class="window-bar">
+          <span class="window-dots"><i></i><i></i><i></i></span>
+          <span class="window-title"># {workspace.channel} — {workspace.name}</span>
+          <span class="tag-demo">Demo</span>
+        </div>
+
+        <div class="chan">
+          <div class="chan-info">
+            <p class="chan-name"># {workspace.channel}</p>
+            <p class="chan-topic">{workspace.topic}</p>
+          </div>
+          <div class="chan-people">
+            <Avatar person={p('mina')} size="sm" showPresence />
+            <Avatar person={p('ali')} size="sm" showPresence />
+            <Avatar person={p('sara')} size="sm" showPresence />
+            <Avatar person={p('omid')} size="sm" showPresence />
+            <span class="chan-count">{workspace.members}</span>
+          </div>
+        </div>
+
+        <div class="stream">
+          {
+            stream.map((beat) => {
+              const who = p(beat.from);
+
+              if (beat.kind === 'message') {
+                return (
+                  <article class="beat msg" data-beat data-wait="1500" data-typing={who.first}>
+                    <Avatar person={who} />
+                    <div class="msg-main">
+                      <p class="who">
+                        {who.name}
+                        <span class="role">{who.role}</span>
+                        <time>{beat.time}</time>
+                      </p>
+                      <p class="body">
+                        <Rich text={beat.body} />
+                      </p>
+
+                      {beat.reactions && (
+                        <p class="reacts" data-beat data-wait="700">
+                          {beat.reactions.map((r) => (
+                            <span class="react">
+                              <svg
+                                width="15"
+                                height="15"
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2">
+                                <ellipse cx="7.6" cy="12" rx="4.4" ry="5.3" />
+                                <ellipse cx="16.4" cy="12" rx="4.4" ry="5.3" />
+                                <circle cx="7.6" cy="12" r="1.5" fill="currentColor" stroke="none" />
+                                <circle cx="16.4" cy="12" r="1.5" fill="currentColor" stroke="none" />
+                              </svg>
+                              <b>{r.count}</b>
+                              <span class="sr-only">{`${r.count} people reacted: ${r.label}`}</span>
+                            </span>
+                          ))}
+                        </p>
+                      )}
+
+                      {beat.thread && (
+                        <div class="thread" data-beat data-wait="900">
+                          <button
+                            class="thread-toggle"
+                            type="button"
+                            aria-expanded="false"
+                            data-thread>
+                            <svg
+                              width="13"
+                              height="13"
+                              viewBox="0 0 24 24"
+                              aria-hidden="true"
+                              fill="currentColor">
+                              <path d="M4 5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H9.4l-3.7 3.3A1 1 0 0 1 4 17.6V5Z" />
+                            </svg>
+                            {beat.thread.count} replies
+                          </button>
+
+                          <div class="thread-panel">
+                            {beat.thread.replies.map((r) => {
+                              const rp = p(r.from);
+                              return (
+                                <div class="reply">
+                                  <Avatar person={rp} size="sm" />
+                                  <div>
+                                    <p class="who who-sm">
+                                      {rp.name}
+                                      <time>{r.time}</time>
+                                    </p>
+                                    <p class="body body-sm">
+                                      <Rich text={r.body} />
+                                    </p>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {beat.receipt && (
+                        <p class="receipt" data-beat data-wait="700">
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                            fill="currentColor">
+                            <path d="M9.3 16.2 5.5 12.4a1 1 0 0 1 1.4-1.4l2.4 2.4 6.4-6.4a1 1 0 0 1 1.4 1.4l-7.1 7.1a1 1 0 0 1-1.4 0Z" />
+                          </svg>
+                          Seen by all {beat.receipt.seen} members
+                        </p>
+                      )}
+                    </div>
+                  </article>
+                );
+              }
+
+              if (beat.kind === 'assistant') {
+                return (
+                  <>
+                    <article class="beat msg" data-beat data-wait="1400" data-typing={who.first}>
+                      <Avatar person={who} />
+                      <div class="msg-main">
+                        <p class="who">
+                          {who.name}
+                          <span class="role">{who.role}</span>
+                          <time>{beat.time}</time>
+                        </p>
+                        <p class="body">
+                          <span class="mention">@assistant</span>
+                          {beat.ask.replace('@assistant', '')}
+                        </p>
+                      </div>
+                    </article>
+
+                    <article class="ai" data-beat data-wait="900">
+                      <Avatar person={p('assistant')} />
+                      <div class="msg-main">
+                        <p class="who">
+                          {people.assistant.name}
+                          <span class="role role-ai">{people.assistant.role}</span>
+                        </p>
+
+                        <ol class="tools">
+                          {beat.steps.map((s) => (
+                            <li data-beat data-wait="850">
+                              <span class="tool-name">{s.tool}</span>
+                              <span class="tool-arg">{s.arg}</span>
+                              <span class="tool-res">{s.result}</span>
+                            </li>
+                          ))}
+                        </ol>
+
+                        <div data-beat data-wait="1100">
+                          <p class="body">
+                            <Rich text={beat.answer} />
+                          </p>
+                          <p class="cites">
+                            {beat.citations.map((c) => (
+                              <span class={`cite cite-${c.kind}`}>{c.label}</span>
+                            ))}
+                          </p>
+                        </div>
+                      </div>
+                    </article>
+                  </>
+                );
+              }
+
+              // kind === 'call'
+              return (
+                <article class="beat call" data-beat data-wait="1200">
+                  <div class="call-icon" aria-hidden="true">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M3 7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Zm14 3.2 3.4-2.4A1 1 0 0 1 22 8.6v6.8a1 1 0 0 1-1.6.8L17 13.8v-3.6Z" />
+                    </svg>
+                  </div>
+                  <div class="call-main">
+                    <p class="call-title">{beat.title}</p>
+                    <p class="call-sub">
+                      Started by {p(beat.from).first} · {beat.duration} · {beat.detail}
+                    </p>
+                  </div>
+                  <div class="call-people">
+                    {beat.participants.map((id) => (
+                      <Avatar person={p(id)} size="sm" />
+                    ))}
+                  </div>
+                </article>
+              );
+            })
+          }
+
+          <!-- JS-only chrome: never rendered without scripting. -->
+          <p class="typing" data-typing-row>
+            <span class="typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span data-typing-name></span> is typing…
+          </p>
+        </div>
+      </div>
+
+      <div class="controls" data-controls>
+        <button class="ctl ctl-primary" type="button" data-play>
+          <span data-play-icon aria-hidden="true"></span>
+          <span data-play-label>Pause</span>
+        </button>
+        <button class="ctl" type="button" data-restart>Restart</button>
+        <p class="status">
+          <span data-status>Playing</span>
+          <span class="status-sep" aria-hidden="true">·</span>
+          <span data-count>0 of 0</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const PLAY_ICON = '▶';
+  const PAUSE_ICON = '❚❚';
+
+  document.querySelectorAll('[data-demo]').forEach((root) => {
+    const beats = [...root.querySelectorAll('[data-beat]')];
+    const typingRow = root.querySelector('[data-typing-row]');
+    const typingName = root.querySelector('[data-typing-name]');
+    const playBtn = root.querySelector('[data-play]');
+    const playLabel = root.querySelector('[data-play-label]');
+    const playIcon = root.querySelector('[data-play-icon]');
+    const restartBtn = root.querySelector('[data-restart]');
+    const statusEl = root.querySelector('[data-status]');
+    const countEl = root.querySelector('[data-count]');
+    if (!beats.length) return;
+
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    let i = 0;
+    let timer = null;
+    let userPaused = false;
+    let inView = false;
+
+    const clear = () => {
+      if (timer) clearTimeout(timer);
+      timer = null;
+    };
+
+    const setTyping = (name) => {
+      if (!typingRow) return;
+      if (name) {
+        typingName.textContent = name;
+        typingRow.classList.add('is-on');
+      } else {
+        typingRow.classList.remove('is-on');
+      }
+    };
+
+    const done = () => i >= beats.length;
+
+    const paint = () => {
+      countEl.textContent = `${i} of ${beats.length}`;
+      const running = timer !== null;
+      statusEl.textContent = done() ? 'Complete' : running ? 'Playing' : 'Paused';
+      playLabel.textContent = done() ? 'Replay' : running ? 'Pause' : 'Play';
+      playIcon.textContent = running ? PAUSE_ICON : PLAY_ICON;
+      playBtn.setAttribute('aria-pressed', String(running));
+    };
+
+    const step = () => {
+      clear();
+      if (done()) {
+        setTyping(null);
+        paint();
+        return;
+      }
+      const el = beats[i];
+      const wait = Number(el.dataset.wait) || 800;
+      const who = el.dataset.typing;
+      setTyping(who || null);
+      timer = setTimeout(() => {
+        setTyping(null);
+        el.classList.add('is-shown');
+        i += 1;
+        step();
+      }, wait);
+      paint();
+    };
+
+    const play = () => {
+      if (done() || timer) return;
+      step();
+    };
+
+    const halt = () => {
+      clear();
+      setTyping(null);
+      paint();
+    };
+
+    const showAll = () => {
+      clear();
+      beats.forEach((el) => el.classList.add('is-shown'));
+      i = beats.length;
+      setTyping(null);
+      paint();
+    };
+
+    const restart = () => {
+      clear();
+      beats.forEach((el) => el.classList.remove('is-shown'));
+      i = 0;
+      userPaused = false;
+      if (reduce.matches) showAll();
+      else step();
+    };
+
+    playBtn.addEventListener('click', () => {
+      if (done()) {
+        restart();
+        return;
+      }
+      if (timer) {
+        userPaused = true;
+        halt();
+      } else {
+        userPaused = false;
+        play();
+      }
+    });
+
+    restartBtn.addEventListener('click', restart);
+
+    // Thread toggles. The panel is open by default and the button is CSS-hidden
+    // without scripting, so this only ever enhances a working state.
+    root.querySelectorAll('[data-thread]').forEach((btn) => {
+      const panel = btn.parentElement?.querySelector('.thread-panel');
+      if (!panel) return;
+      btn.addEventListener('click', () => {
+        const open = panel.classList.toggle('is-open');
+        btn.setAttribute('aria-expanded', String(open));
+      });
+    });
+
+    // Reduced motion gets the finished state, not a paused animation
+    // (MANIFEST §6.4) — and the controls are hidden by CSS in that mode.
+    if (reduce.matches) {
+      showAll();
+      return;
+    }
+
+    // Reveal the opening message straight away, so the panel is never an empty
+    // box waiting for a timer — it also gives the section a sensible resting
+    // state when the viewer never scrolls it into view.
+    beats[0].classList.add('is-shown');
+    i = 1;
+    paint();
+
+    // Play only while visible; threshold 0 because the panel can be taller
+    // than a phone viewport (MANIFEST §8.2).
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            inView = e.isIntersecting;
+            if (inView && !userPaused) play();
+            else if (!inView) halt();
+          });
+        },
+        { threshold: 0 }
+      );
+      io.observe(root);
+    } else {
+      showAll();
+    }
+  });
+</script>
+
+<style>
+  .demo {
+    max-width: 880px;
+    margin-inline: auto;
+  }
+
+  /* ── channel header ── */
+  .chan {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .chan-info {
+    min-width: 0;
+  }
+
+  .chan-name {
+    font-weight: 700;
+    letter-spacing: -0.015em;
+  }
+
+  .chan-topic {
+    font-size: 0.83rem;
+    color: var(--text-3);
+  }
+
+  .chan-people {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    flex: none;
+  }
+
+  .chan-people :global(.avatar) {
+    margin-left: -7px;
+    box-shadow: 0 0 0 2px var(--surface);
+  }
+
+  .chan-count {
+    margin-left: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-3);
+  }
+
+  /* ── stream ── */
+  .stream {
+    padding: 22px 20px 18px;
+    display: grid;
+    gap: 20px;
+  }
+
+  /* Hiding is scoped to .js so the transcript is complete without scripting.
+     Only `[data-beat]` is gated — a container the engine never touches would
+     stay invisible forever. */
+  :global(.js) [data-beat] {
+    /* Ghosted rather than fully transparent: the beats already occupy their
+       layout space, so at zero opacity the panel reads as a large empty box
+       before it plays. At 0.06 the shape of the conversation shows through
+       without the text being legible ahead of its turn. */
+    opacity: 0.06;
+    transform: translateY(9px);
+    transition: opacity 0.34s ease, transform 0.34s ease;
+  }
+
+  :global(.js) [data-beat].is-shown {
+    opacity: 1;
+    transform: none;
+  }
+
+  .msg,
+  .ai {
+    display: flex;
+    gap: 13px;
+    align-items: flex-start;
+  }
+
+  .msg-main {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .who {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex-wrap: wrap;
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .who-sm {
+    font-size: 0.82rem;
+  }
+
+  .role {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 1px 7px;
+  }
+
+  .role-ai {
+    color: var(--accent-2);
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    background: var(--accent-soft);
+  }
+
+  .who time {
+    font-size: 0.74rem;
+    font-weight: 500;
+    color: var(--text-3);
+  }
+
+  .body {
+    margin-top: 3px;
+    color: var(--text-2);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .body-sm {
+    font-size: 0.9rem;
+  }
+
+  .mention {
+    font-weight: 600;
+    color: var(--accent-2);
+    background: var(--accent-soft);
+    border-radius: 5px;
+    padding: 0 4px;
+    margin-right: 2px;
+  }
+
+  /* ── reactions ── */
+  .reacts {
+    margin-top: 9px;
+    display: flex;
+    gap: 6px;
+  }
+
+  .react {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--accent-2);
+    padding: 2px 9px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    background: var(--accent-soft);
+    font-size: 0.8rem;
+  }
+
+  .react b {
+    font-size: 0.72rem;
+    color: var(--accent-2);
+  }
+
+  /* ── thread ── */
+  .thread {
+    margin-top: 10px;
+  }
+
+  /* Without JS the panel is simply open, so the toggle is not rendered at all
+     rather than shipped inert (MANIFEST §6.4). */
+  .thread-toggle {
+    display: none;
+  }
+
+  :global(.js) .thread-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 11px;
+    border-radius: 8px;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--accent-2);
+    transition: background 0.15s ease;
+  }
+
+  :global(.js) .thread-toggle:hover {
+    background: var(--surface-2);
+  }
+
+  .thread-panel {
+    margin-top: 12px;
+    padding-left: 15px;
+    border-left: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    display: grid;
+    gap: 14px;
+  }
+
+  :global(.js) .thread-panel {
+    display: none;
+  }
+
+  :global(.js) .thread-panel.is-open {
+    display: grid;
+  }
+
+  .reply {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  /* ── read receipt ── */
+  .receipt {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--mint);
+  }
+
+  /* ── assistant tool loop ── */
+  .tools {
+    list-style: none;
+    padding: 0;
+    margin: 9px 0 13px;
+    display: grid;
+    gap: 6px;
+  }
+
+  .tools li {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 6px 11px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 0.79rem;
+  }
+
+  .tool-name {
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--accent-2);
+  }
+
+  .tool-arg {
+    font-family: var(--mono);
+    font-size: 0.73rem;
+    color: var(--text-2);
+    word-break: break-word;
+  }
+
+  .tool-res {
+    margin-left: auto;
+    color: var(--mint);
+    font-weight: 600;
+    font-size: 0.74rem;
+    white-space: nowrap;
+  }
+
+  .cites {
+    margin-top: 11px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  .cite {
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 7px;
+    border: 1px solid var(--border-strong);
+    color: var(--text-3);
+    background: var(--surface);
+  }
+
+  .cite::before {
+    content: "↳ ";
+    color: var(--accent-2);
+  }
+
+  /* ── call banner ── */
+  .call {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--mint) 42%, transparent);
+    background: var(--mint-soft);
+  }
+
+  .call-icon {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    background: var(--mint);
+    color: #04231f;
+  }
+
+  .call-main {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .call-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+  }
+
+  .call-sub {
+    font-size: 0.79rem;
+    color: var(--text-2);
+  }
+
+  .call-people {
+    display: flex;
+    flex: none;
+  }
+
+  .call-people :global(.avatar) {
+    margin-left: -7px;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--mint) 20%, var(--bg-raised));
+  }
+
+  /* ── typing indicator (JS-only chrome) ── */
+  .typing {
+    display: none;
+    align-items: center;
+    gap: 9px;
+    font-size: 0.82rem;
+    color: var(--text-3);
+    min-height: 20px;
+  }
+
+  :global(.js) .typing.is-on {
+    display: flex;
+  }
+
+  .typing-dots {
+    display: inline-flex;
+    gap: 4px;
+  }
+
+  .typing-dots i {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--text-3);
+    animation: blink 1.25s ease-in-out infinite;
+  }
+
+  .typing-dots i:nth-child(2) {
+    animation-delay: 0.18s;
+  }
+
+  .typing-dots i:nth-child(3) {
+    animation-delay: 0.36s;
+  }
+
+  @keyframes blink {
+    0%,
+    100% {
+      opacity: 0.28;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  /* ── controls ── */
+  .controls {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  :global(.js) .controls {
+    display: flex;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.js) .controls {
+      display: none;
+    }
+  }
+
+  .ctl {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 9px;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    font-size: 0.87rem;
+    font-weight: 600;
+    transition: background 0.15s ease;
+  }
+
+  .ctl:hover {
+    background: var(--surface-2);
+  }
+
+  .ctl-primary {
+    border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+    background: var(--accent-soft);
+    color: var(--accent-2);
+  }
+
+  .ctl [data-play-icon] {
+    font-size: 0.7rem;
+    line-height: 1;
+  }
+
+  .status {
+    margin-left: auto;
+    font-size: 0.82rem;
+    color: var(--text-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .status-sep {
+    margin-inline: 6px;
+  }
+
+  @media (max-width: 640px) {
+    .stream {
+      padding: 18px 14px 14px;
+      gap: 17px;
+    }
+
+    .chan {
+      padding: 13px 14px;
+    }
+
+    .chan-topic {
+      display: none;
+    }
+
+    .tool-res {
+      margin-left: 0;
+    }
+
+    .status {
+      width: 100%;
+      margin-left: 0;
+      order: -1;
+    }
+
+    .controls {
+      flex-wrap: wrap;
+    }
+  }
+</style>

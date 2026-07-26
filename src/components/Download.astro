@@ -1,0 +1,264 @@
+---
+import PlatformIcon from './PlatformIcon.astro';
+import { platforms, downloadUrl, desktopVersion, desktopSigned, releasesUrl } from '../site.js';
+---
+
+<section class="section" id="download">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Download</span>
+      <h2>Get the desktop client</h2>
+      <p>
+        A native shell around the hub: it lives in the tray, keeps unread counts on the
+        taskbar, rings for calls, and draws real notification cards instead of browser
+        toasts. On first launch it asks which hub to connect to.
+      </p>
+    </div>
+
+    <ul class="grid reveal" data-platforms>
+      {
+        platforms.map((pf) => {
+          const href = downloadUrl(pf);
+          return (
+            <li class={`card${pf.available ? ' is-live' : ''}`} data-platform={pf.match}>
+              <span class="here" data-here hidden>Yours</span>
+              <div class="head">
+                <span class="ic"><PlatformIcon icon={pf.icon} /></span>
+                <div class="titles">
+                  <p class="name">{pf.name}</p>
+                  <p class="detail">{pf.detail}</p>
+                </div>
+              </div>
+
+              <p class="note">{pf.note}</p>
+
+              {href ? (
+                <a class="btn btn-primary act" href={href} data-track={`download-${pf.id}`}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+                    <path d="M12 3a1 1 0 0 1 1 1v9.6l3.3-3.3a1 1 0 0 1 1.4 1.4l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 0 1 1.4-1.4L11 13.6V4a1 1 0 0 1 1-1Z" />
+                    <path d="M4 19a1 1 0 0 1 1-1h14a1 1 0 0 1 0 2H5a1 1 0 0 1-1-1Z" />
+                  </svg>
+                  Download
+                </a>
+              ) : (
+                <button class="btn act act-off" type="button" disabled>
+                  {pf.status}
+                </button>
+              )}
+            </li>
+          );
+        })
+      }
+    </ul>
+
+    <div class="meta reveal">
+      <p>
+        <strong>Version {desktopVersion}</strong> — an early release, still on a
+        <code>0.x</code> version for a reason. <a href={releasesUrl}>Release notes</a>.
+      </p>
+      {
+        !desktopSigned && (
+          <p>
+            Builds are not code-signed yet, so Windows will show a SmartScreen prompt the
+            first time — choose <em>More info</em>, then <em>Run anyway</em>.
+          </p>
+        )
+      }
+      <p>
+        No desktop client for your platform yet? The hub is a full web application — every
+        feature on this page works in a browser, and installs to your home screen.
+      </p>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Progressive enhancement only: marks the card matching the visitor's OS. Every
+  // card is already visible and usable without this (MANIFEST §8.1).
+  const ua = navigator.userAgent;
+  // Order matters — Android's user agent also contains "Linux", and iPadOS reports
+  // itself as a Mac, so touch points disambiguate it.
+  const guess = /Android/i.test(ua)
+    ? 'Android'
+    : /iPhone|iPod/i.test(ua)
+      ? 'iOS'
+      : /iPad/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1)
+        ? 'iOS'
+        : /Windows|Win32|Win64/i.test(ua)
+          ? 'Windows'
+          : /Macintosh|Mac OS X/i.test(ua)
+            ? 'macOS'
+            : /Linux|X11/i.test(ua)
+              ? 'Linux'
+              : null;
+
+  if (guess) {
+    const card = document.querySelector(`[data-platform="${guess}"]`);
+    const badge = card?.querySelector('[data-here]');
+    if (badge) {
+      badge.hidden = false;
+      card.classList.add('is-here');
+    }
+  }
+</script>
+
+<style>
+  /* Explicit column counts rather than auto-fit: with five platforms, auto-fit
+     lands on four and orphans the fifth on its own row. */
+  .grid {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  @media (max-width: 1080px) {
+    .grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 460px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 17px 18px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .card.is-live {
+    border-color: color-mix(in srgb, var(--accent) 42%, transparent);
+    background:
+      radial-gradient(130% 80% at 50% 0%, var(--accent-soft), transparent 68%),
+      var(--surface);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .card.is-here {
+    outline: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+    outline-offset: 3px;
+  }
+
+  .head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .ic {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-2);
+  }
+
+  .is-live .ic {
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+    background: var(--accent-soft);
+    color: var(--accent-2);
+  }
+
+  .titles {
+    min-width: 0;
+  }
+
+  .name {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+  }
+
+  /* Corner marker rather than an inline chip — at five-across the card is only
+     ~210px wide and an inline badge pushed the platform detail onto two lines. */
+  .here {
+    position: absolute;
+    top: 10px;
+    right: 11px;
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .detail {
+    font-size: 0.8rem;
+    color: var(--text-3);
+    line-height: 1.4;
+  }
+
+  .note {
+    margin-top: 14px;
+    margin-bottom: 18px;
+    flex: 1;
+    font-size: 0.87rem;
+    color: var(--text-2);
+    line-height: 1.55;
+  }
+
+  .act {
+    width: 100%;
+  }
+
+  /* A genuinely disabled button, not a link styled to look inert. */
+  .act-off {
+    border-color: var(--border-strong);
+    color: var(--text-3);
+    background: var(--surface-2);
+    cursor: not-allowed;
+  }
+
+  .act-off:active {
+    transform: none;
+  }
+
+  .meta {
+    margin-top: 34px;
+    display: grid;
+    gap: 9px;
+    max-width: 620px;
+    margin-inline: auto;
+    text-align: center;
+    font-size: 0.89rem;
+    color: var(--text-3);
+    line-height: 1.6;
+  }
+
+  .meta strong {
+    color: var(--text-2);
+  }
+
+  .meta a {
+    color: var(--accent-2);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .meta a:hover {
+    text-decoration: underline;
+  }
+</style>

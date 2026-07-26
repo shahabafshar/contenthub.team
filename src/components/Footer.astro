@@ -1,0 +1,102 @@
+---
+import Logo from './Logo.astro';
+import { releasesUrl, domain } from '../site.js';
+---
+
+<footer>
+  <div class="container">
+    <div class="top">
+      <div class="brand">
+        <Logo size={30} id="ftr" withWordmark />
+        <p>
+          A team hub — chat, calls, documents and an assistant — that runs entirely on
+          infrastructure you control.
+        </p>
+      </div>
+
+      <nav aria-label="Footer">
+        <p class="group">Product</p>
+        <a href="#conversation">How it works</a>
+        <a href="#calls">Calls</a>
+        <a href="#features">Features</a>
+        <a href="#self-hosted">Self-hosting</a>
+      </nav>
+
+      <nav aria-label="Downloads">
+        <p class="group">Get it</p>
+        <a href="#download">Desktop client</a>
+        <a href={releasesUrl}>Release notes</a>
+      </nav>
+    </div>
+
+    <p class="bottom">{domain}</p>
+  </div>
+</footer>
+
+<style>
+  footer {
+    border-top: 1px solid var(--border);
+    padding-block: 52px 40px;
+    background: var(--bg-raised);
+  }
+
+  .top {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) repeat(2, minmax(0, 1fr));
+    gap: 40px;
+  }
+
+  .brand p {
+    margin-top: 14px;
+    max-width: 34ch;
+    font-size: 0.9rem;
+    color: var(--text-3);
+    line-height: 1.6;
+  }
+
+  nav {
+    display: grid;
+    gap: 9px;
+    align-content: start;
+  }
+
+  .group {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 2px;
+  }
+
+  nav a {
+    font-size: 0.9rem;
+    color: var(--text-2);
+    text-decoration: none;
+    width: fit-content;
+  }
+
+  nav a:hover {
+    color: var(--text);
+    text-decoration: underline;
+  }
+
+  .bottom {
+    margin-top: 40px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
+    font-size: 0.84rem;
+    color: var(--text-3);
+  }
+
+  @media (max-width: 760px) {
+    .top {
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+
+    .brand {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

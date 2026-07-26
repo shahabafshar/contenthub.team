@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4338ca"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#1e1b4b" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Background: gradient rounded square -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- Three offset "content" cards — layered depth, increasing opacity -->
+  <g filter="url(#shadow)">
+    <rect x="96"  y="112" width="280" height="208" rx="28" fill="#ffffff" fill-opacity="0.22"/>
+    <rect x="140" y="152" width="280" height="208" rx="28" fill="#ffffff" fill-opacity="0.52"/>
+    <rect x="184" y="192" width="280" height="208" rx="28" fill="#ffffff"/>
+  </g>
+
+  <!-- Connection accent on the top card -->
+  <circle cx="324" cy="296" r="14" fill="#7c3aed"/>
+  <circle cx="380" cy="296" r="14" fill="#4338ca" fill-opacity="0.7"/>
+  <circle cx="436" cy="296" r="14" fill="#4338ca" fill-opacity="0.4"/>
+</svg>

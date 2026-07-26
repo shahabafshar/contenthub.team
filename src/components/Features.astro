@@ -1,0 +1,122 @@
+---
+/**
+ * Only capabilities that are actually implemented (MANIFEST §1.5). The unstarted
+ * enterprise work — audit trails, retention policy, DLP, end-to-end encryption,
+ * guest access — is deliberately absent, and is listed as roadmap in SITE.md.
+ */
+const features = [
+  {
+    icon: 'search',
+    title: 'Search that finds the sentence',
+    body: 'A Meilisearch index over every message you have access to — typo-tolerant, ranked, and scoped to your own channels and conversations.',
+  },
+  {
+    icon: 'bell',
+    title: 'Notifications people keep switched on',
+    body: 'Web push in the browser and email digests for what you missed, both handled by a background worker. The desktop client draws its own notification cards and honours Windows Focus Assist.',
+  },
+  {
+    icon: 'doc',
+    title: 'Documents, pages and lists',
+    body: 'Folders and documents with revision history, editable pages, announcements, and structured lists you can build from a template — all in the same hub as the conversation about them.',
+  },
+  {
+    icon: 'spark',
+    title: 'An assistant that can actually look things up',
+    body: 'It calls tools mid-answer — searching messages, reading a document, fetching a page through your own self-hosted metasearch — and shows each step. Attachments are read too: PDF, Word and text for any model, images for the ones that can see.',
+  },
+  {
+    icon: 'key',
+    title: 'Your identity provider, not ours',
+    body: 'Sign-in over OpenID Connect, so accounts and group membership stay in the directory you already run. Token auth is there for anything scripted.',
+  },
+  {
+    icon: 'pulse',
+    title: 'Presence and read state that stay honest',
+    body: 'Typing indicators, online and away presence, and per-message read receipts arrive over the same WebSocket as the messages, backed by Redis.',
+  },
+];
+
+const paths = {
+  search:
+    'M10 3a7 7 0 1 0 4.2 12.6l4.1 4.1a1 1 0 0 0 1.4-1.4l-4.1-4.1A7 7 0 0 0 10 3Zm0 2a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z',
+  bell: 'M12 2a6 6 0 0 0-6 6v3.6L4.5 15a1 1 0 0 0 .9 1.5h13.2a1 1 0 0 0 .9-1.5L18 11.6V8a6 6 0 0 0-6-6Zm0 17a2.6 2.6 0 0 0 2.5-1.8h-5A2.6 2.6 0 0 0 12 19Z',
+  doc: 'M6 2h7l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm7 1.8V8h4.2L13 3.8ZM8 12h8v1.8H8V12Zm0 4h6v1.8H8V16Z',
+  spark:
+    'M12 2.5l1.9 5.1 5.1 1.9-5.1 1.9L12 16.5l-1.9-5.1L5 9.5l5.1-1.9L12 2.5Zm6 12l.9 2.3 2.3.9-2.3.9-.9 2.3-.9-2.3-2.3-.9 2.3-.9.9-2.3Z',
+  key: 'M14.5 3a6.5 6.5 0 0 0-6.3 8.1L3 16.3V21h4.7v-2.3H10v-2.3h2.1l.8-.8A6.5 6.5 0 1 0 14.5 3Zm1.8 3.2a1.6 1.6 0 1 1 0 3.2 1.6 1.6 0 0 1 0-3.2Z',
+  pulse: 'M3 12h3.4l2.1-5.6a1 1 0 0 1 1.9.1l2.8 10 2-4.1a1 1 0 0 1 .9-.6H21v2h-4.3l-2.6 5.3a1 1 0 0 1-1.9-.2L9.5 9.3 8.2 12.7a1 1 0 0 1-.9.6H3v-2Z',
+};
+---
+
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">The rest of it</span>
+      <h2>Everything a team hub needs, in one deployment</h2>
+      <p>
+        One application, one database, one login. Nothing below is a paid add-on or a
+        third-party service you have to sign up for separately.
+      </p>
+    </div>
+
+    <ul class="grid">
+      {
+        features.map((f) => (
+          <li class="card reveal">
+            <span class="ic" aria-hidden="true">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor">
+                <path d={paths[f.icon]} />
+              </svg>
+            </span>
+            <h3>{f.title}</h3>
+            <p>{f.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .grid {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+  }
+
+  .card {
+    padding: 26px 24px 28px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .ic {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    color: var(--accent-2);
+    margin-bottom: 15px;
+  }
+
+  h3 {
+    font-size: 1.03rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.32;
+  }
+
+  p {
+    margin-top: 9px;
+    color: var(--text-2);
+    font-size: 0.94rem;
+    line-height: 1.62;
+  }
+</style>

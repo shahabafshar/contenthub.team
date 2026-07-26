@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "contenthub-team",
+  "compatibility_date": "2026-07-26",
+  "assets": {
+    "directory": "./dist",
+    // Serves the built 404.html instead of a bare Worker error.
+    "not_found_handling": "404-page"
+  }
+}

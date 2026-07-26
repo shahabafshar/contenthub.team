@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import ChatDemo from '../components/ChatDemo.astro';
+import Payoff from '../components/Payoff.astro';
+import Calls from '../components/Calls.astro';
+import Features from '../components/Features.astro';
+import SelfHosted from '../components/SelfHosted.astro';
+import Download from '../components/Download.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout
+  title="ContentHub — self-hosted team chat, calls and docs"
+  description="A self-hosted team hub: real-time chat with threads, video calls, shared documents and an AI assistant — on your own servers, behind your own single sign-on.">
+  <Header />
+  <main id="main">
+    <Hero />
+    <ChatDemo />
+    <Payoff />
+    <Calls />
+    <Features />
+    <SelfHosted />
+    <Download />
+  </main>
+  <Footer />
+</BaseLayout>

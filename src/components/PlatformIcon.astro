@@ -1,0 +1,77 @@
+---
+/**
+ * Platform glyphs. All fill-based at one optical weight so the set reads as one
+ * system (MANIFEST §7.2), and each is reviewed at its rendered size — 20px in the
+ * download grid — for legibility (§7.5).
+ *
+ * Where a glyph needs a hole (Android's eyes) it uses `fill-rule="evenodd"` rather
+ * than a shape painted in the background colour, so the icon stays correct on the
+ * several different chip backgrounds it appears on.
+ */
+interface Props {
+  icon: string;
+  size?: number;
+}
+
+const { icon, size = 20 } = Astro.props;
+---
+
+<svg
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="currentColor"
+  aria-hidden="true"
+  focusable="false">
+  {
+    icon === 'windows' && (
+      <>
+        <rect x="3.2" y="4.2" width="8" height="7.2" rx="0.7" />
+        <rect x="12.8" y="4.2" width="8" height="7.2" rx="0.7" />
+        <rect x="3.2" y="12.6" width="8" height="7.2" rx="0.7" />
+        <rect x="12.8" y="12.6" width="8" height="7.2" rx="0.7" />
+      </>
+    )
+  }
+
+  {
+    (icon === 'apple' || icon === 'ios') && (
+      <path d="M16.6 12.7c0-2.1 1.7-3.1 1.8-3.2-1-1.4-2.5-1.6-3-1.7-1.4-.1-2.5.8-3.2.8-.7 0-1.6-.8-2.7-.8-1.4 0-2.8.9-3.5 2.2-1.5 2.6-.4 6.4 1.1 8.5.7 1 1.5 2.1 2.6 2.1s1.4-.7 2.7-.7 1.6.7 2.7.7 1.9-1 2.6-2.1c.5-.7.8-1.5 1-2.3-2.3-.9-2.1-3.4-2.1-3.5ZM14.4 6.3c.6-.7.9-1.6.8-2.6-.9.1-1.8.6-2.4 1.3-.5.6-.9 1.5-.8 2.4 1 .1 1.9-.5 2.4-1.1Z" />
+    )
+  }
+
+  {
+    icon === 'linux' && (
+      <>
+        {/* Penguin. Solid silhouette with the eyes knocked out (evenodd) plus an
+            amber beak and feet — the two cues that make it read as Tux and not a
+            generic blob at small size. */}
+        <path
+          fill-rule="evenodd"
+          d="M12 2.3c-2.5 0-4.3 1.9-4.3 4.4 0 1.3-.3 2.1-1 3.2C5.5 11.8 4.7 13.5 4.7 15.5c0 3.3 3 5.6 7.3 5.6s7.3-2.3 7.3-5.6c0-2-.8-3.7-2-5.6-.7-1.1-1-1.9-1-3.2 0-2.5-1.8-4.4-4.3-4.4Zm-2 3.6a1.05 1.05 0 1 1 0 2.1 1.05 1.05 0 0 1 0-2.1Zm4 0a1.05 1.05 0 1 1 0 2.1 1.05 1.05 0 0 1 0-2.1Z"
+        />
+        <path d="M12 8c1.1 0 2 .6 2 1.3s-.9 1.2-2 1.2-2-.5-2-1.2S10.9 8 12 8Z" fill="#f59e0b" />
+        <path d="M8.5 19.9c-.6.8-1.5 1.2-2.2.9-.7-.3-.6-1.1.1-1.7l1.3-1.1 1.1.9-.3 1Zm7 0c.6.8 1.5 1.2 2.2.9.7-.3.6-1.1-.1-1.7l-1.3-1.1-1.1.9.3 1Z" fill="#f59e0b" />
+      </>
+    )
+  }
+
+  {
+    icon === 'android' && (
+      <>
+        {/* Rounded dome with knocked-out eyes, body, and the two side arms.
+            Antennae are omitted — at 20px they read as noise. */}
+        <path
+          fill-rule="evenodd"
+          d="M12 3.4c-4.1 0-7.4 2.7-7.6 6.1h15.2C19.4 6.1 16.1 3.4 12 3.4ZM9.2 7.3a.85.85 0 1 1 0-1.7.85.85 0 0 1 0 1.7Zm5.6 0a.85.85 0 1 1 0-1.7.85.85 0 0 1 0 1.7Z"
+        />
+        <path
+          d="M4.6 10.7h14.8v6.2a2.3 2.3 0 0 1-2.3 2.3H6.9a2.3 2.3 0 0 1-2.3-2.3v-6.2Z"
+          opacity="0.5"
+        />
+        <rect x="1.3" y="10.7" width="2.2" height="6.3" rx="1.1" />
+        <rect x="20.5" y="10.7" width="2.2" height="6.3" rx="1.1" />
+      </>
+    )
+  }
+</svg>
