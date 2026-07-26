@@ -76,7 +76,11 @@ contact form, because none of those exist yet.
     styles/global.css  tokens, base, layout helpers, shared app chrome
   public/
     og.jpg  robots.txt  assets/
-    download/ContentHub-<version>.exe    the 2.6 MB Windows build, served by this site
+    _headers                        caps /download/* caching so updates are noticed
+    download/ContentHub-Native.exe      the 2.6 MB Windows build, served by this site
+    download/ContentHub-Native.exe.md5  generated on prebuild — never edit by hand
+  scripts/
+    write-download-hash.mjs         writes the MD5 sidecars; wired to npm prebuild
   ```
 
 ## Design intent
@@ -147,18 +151,49 @@ the reaction chip draws its own eyes glyph.
 ### Desktop downloads — served by this site
 
 **The Windows build ships inside this repo** at
-`public/download/ContentHub-<version>.exe`, and the button points at the relative path.
-There is no external host and no release to create: the link works the moment Cloudflare
-deploys.
+`public/download/ContentHub-Native.exe`, and the button points at the relative path. There
+is no external host and no release to create: the link works the moment Cloudflare deploys.
 
-That is possible because the download is the **Tauri/WebView2 build**
-(`desktop-win/` in the app repo), not the Electron one. It is **2.6 MB**, comfortably
-inside Cloudflare's 25 MiB per-file asset limit, whereas the Electron build is ~74 MB and
-could never be served this way.
+```
+https://contenthub.team/download/ContentHub-Native.exe
+https://contenthub.team/download/ContentHub-Native.exe.md5
+```
 
-The path is built from `desktopVersion`, so bumping the version changes the URL and no
-stale copy can be served from a CDN or browser cache. **Delete the previous exe when you
-bump it** — otherwise the repo accumulates a few MB per release.
+That is possible because the download is the **Tauri/WebView2 build** (`desktop-win/` in
+the app repo), not the Electron one. It is **2.6 MB**, comfortably inside Cloudflare's
+25 MiB per-file asset limit, whereas the Electron build is ~74 MB and could never be
+served this way.
+
+#### The filename is fixed, and the MD5 sidecar is load-bearing
+
+The filename **must stay `ContentHub-Native.exe`**, matching what `build-all.mjs` mirrors
+to `desktop/dist/` in the app repo. No version in the path, ever: the URL is linked from
+outside this site, so it must not change between releases.
+
+Because the name is stable, freshness cannot come from the URL. **An MD5 sidecar sits
+beside the binary** at the same name plus `.md5`, holding the bare lowercase 32-character
+digest and a newline — nothing else, so a client can use `(await res.text()).trim()` with
+no parsing. Installed clients poll it to detect that a new build has shipped, which makes
+it part of the update mechanism rather than a nicety: a hash that disagrees with the
+binary beside it either blinds every installed copy to an update or sends it after a build
+that does not exist.
+
+Two things keep that honest, and both must stay wired up:
+
+- **`scripts/write-download-hash.mjs`** rewrites a sidecar for every binary in
+  `public/download/` and runs from npm **`prebuild`**, so `npm run build` — including
+  Cloudflare's — regenerates it. The hash cannot drift from the binary, and nobody has to
+  remember to update it. `npm run download:hash` runs it on its own.
+- **`public/_headers`** caps `/download/*` at `max-age=300`. A long cache would defeat the
+  whole mechanism: a stale `.md5` hides new builds, and a stale `.exe` serves a file whose
+  hash no longer matches. Both use the same max-age so the pair can never come from
+  different generations. Cloudflare honours this file; `astro preview` ignores it, so the
+  header itself is only observable on a real deploy.
+
+To ship a new build: copy `desktop/dist/ContentHub-Native.exe` over the existing one, bump
+`desktopVersion` in `src/site.js` for the version shown on the page, and build. The sidecar
+updates itself. Since the filename never changes, nothing accumulates in the repo — but
+each new binary does add ~2.6 MB to git history.
 
 `src/site.js` supports both hosting routes, and `downloadUrl()` picks per platform:
 

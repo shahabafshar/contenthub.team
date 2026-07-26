@@ -1,0 +1,14 @@
+# Cloudflare static-asset headers (Workers Assets honours this file, as Pages does).
+#
+# The Windows download has a FIXED filename so its URL can be linked from elsewhere,
+# which means freshness cannot come from a versioned path. Installed clients poll
+# ContentHub-Native.exe.md5 to notice a new build, so neither the sidecar nor the binary
+# may sit in a long-lived cache — a stale .md5 makes clients blind to an update, and a
+# stale .exe makes them download a build whose hash does not match.
+#
+# Five minutes: long enough to absorb a burst of downloads, short enough that a new
+# build is picked up promptly. Both files use the SAME max-age on purpose, so the pair
+# can never be served from different generations.
+/download/*
+  Cache-Control: public, max-age=300, must-revalidate
+  X-Content-Type-Options: nosniff

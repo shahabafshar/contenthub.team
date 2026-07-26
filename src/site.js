@@ -12,9 +12,27 @@ export const releasesUrl = `${repoUrl}/releases`;
 const downloadBase = `${repoUrl}/releases/latest/download`;
 
 // Desktop version. Tracks `desktop-win/src-tauri/tauri.conf.json` (and
-// `desktop/package.json`) in the application repo — bump it here when a new build ships,
-// and the site-hosted download path below follows automatically, so no cache goes stale.
+// `desktop/package.json`) in the application repo — bump it here when a new build ships.
 export const desktopVersion = '0.3.0';
+
+/**
+ * The Windows filename is FIXED, deliberately — it matches `build-all.mjs`'s
+ * `desktop/dist/ContentHub-Native.exe` in the application repo, so the download URL never
+ * changes and can be linked from installers, docs and scripts elsewhere.
+ *
+ * Because the name is stable, freshness cannot come from the URL. Instead an MD5 sidecar
+ * sits beside the binary at the same path plus `.md5`, holding the bare lowercase digest
+ * and nothing else. Installed clients poll it to detect a new build. `scripts/
+ * write-download-hash.mjs` regenerates every sidecar on `prebuild`, so the hash can never
+ * disagree with the binary next to it, and `public/_headers` keeps both on a short cache
+ * so a new build is actually noticed.
+ */
+export const nativeWindowsFile = 'ContentHub-Native.exe';
+
+/** Absolute URL of a platform's MD5 sidecar, or null when it has no self-hosted build. */
+export function checksumUrl(platform) {
+  return platform.path ? `${platform.path}.md5` : null;
+}
 
 // Builds are produced unsigned (no code-signing certificates in CI), which is why the
 // download note mentions the SmartScreen prompt. Do not drop that note without also
@@ -41,7 +59,7 @@ export const platforms = [
     icon: 'windows',
     detail: 'Windows 10 & 11 · 64-bit',
     note: 'One 2.6 MB .exe — no installer, no admin rights. Uses the WebView2 runtime already on Windows 10 and 11.',
-    path: `/download/ContentHub-${desktopVersion}.exe`,
+    path: `/download/${nativeWindowsFile}`,
     size: '2.6 MB',
     available: true,
     match: 'Windows',
