@@ -76,6 +76,7 @@ contact form, because none of those exist yet.
     styles/global.css  tokens, base, layout helpers, shared app chrome
   public/
     og.jpg  robots.txt  assets/
+    download/ContentHub-<version>.exe    the 2.6 MB Windows build, served by this site
   ```
 
 ## Design intent
@@ -143,37 +144,68 @@ the reaction chip draws its own eyes glyph.
   branches `npx wrangler versions upload`; root directory `/`
 - **Flow:** commit → push to `main` → Cloudflare builds and deploys
 
-### Desktop downloads — why they live on *this* repo
+### Desktop downloads — served by this site
 
-The download button points at
-`https://github.com/shahabafshar/contenthub.team/releases/latest/download/ContentHub.exe`.
+**The Windows build ships inside this repo** at
+`public/download/ContentHub-<version>.exe`, and the button points at the relative path.
+There is no external host and no release to create: the link works the moment Cloudflare
+deploys.
 
-That is this website's repo, not the application's, for two reasons:
+That is possible because the download is the **Tauri/WebView2 build**
+(`desktop-win/` in the app repo), not the Electron one. It is **2.6 MB**, comfortably
+inside Cloudflare's 25 MiB per-file asset limit, whereas the Electron build is ~74 MB and
+could never be served this way.
 
-1. The application repo `shahabafshar/ContentHub` is **private**, so its release assets
-   are not publicly downloadable — an anonymous request 404s.
-2. The build is ~74 MB, far over Cloudflare's per-file static-asset limit, so it cannot be
-   served out of this site's own `dist/`.
+The path is built from `desktopVersion`, so bumping the version changes the URL and no
+stale copy can be served from a CDN or browser cache. **Delete the previous exe when you
+bump it** — otherwise the repo accumulates a few MB per release.
 
-GitHub release assets on a public repo are public, allow up to 2 GB per file, and cost
-nothing. **A release must exist for the link to resolve** — see Notes below.
+`src/site.js` supports both hosting routes, and `downloadUrl()` picks per platform:
 
-To publish a new version: attach the artefacts from the app repo's
-`desktop/dist/<version>/` to a release here, then bump `desktopVersion` in `src/site.js`.
-To enable another platform, flip its `available` flag in the same file — the filenames are
-already pre-filled from the app's electron-builder `artifactName` config.
+| Field  | Serves from                          | Use when                                   |
+|--------|--------------------------------------|--------------------------------------------|
+| `path` | this site, out of `public/`           | under 25 MiB — preferred, works instantly  |
+| `file` | a GitHub release asset on this repo   | too large for `path`                       |
+
+`file` is still pre-filled for macOS and Linux from the app's electron-builder
+`artifactName` config, because those are Electron builds and will be far too large to
+self-host. The application repo `shahabafshar/ContentHub` is **private**, so its own
+release assets are not publicly downloadable — an anonymous request 404s. That is why any
+release-hosted artefact must be attached here rather than there.
+
+Enabling a platform is a one-word change: flip its `available` flag.
 
 ## Notes / decisions
 
-- **Outstanding prerequisite:** no GitHub release exists on this repo yet, so the Windows
-  download link 404s until one is created with `ContentHub.exe` attached. Everything else
-  on the page works. The app repo has no `v*` tags either, so its release CI has never run.
-- **Unsigned builds.** CI sets `CSC_IDENTITY_AUTO_DISCOVERY: false` and there are no
-  signing certificates. The download section says so and warns about the SmartScreen
+- **The published Windows client is the Tauri build, and it is not the Electron one.**
+  Per `desktop-win/README.md` its phase 1 covers loading the hub in WebView2,
+  single-instance and a tray icon with Open/Quit. **Not yet ported:** the layered hub
+  config and first-run picker, the unread badge, custom notification cards with the
+  Focus-Assist gate, deep links, start-at-login, and auto-update. Its README also flags
+  camera/microphone permission in WebView2 as "**the #1 thing to verify**", so calls in
+  this build are unconfirmed.
+
+  The page copy was rewritten to match. It no longer claims tray unread counts, call
+  ringing, notification cards or a first-run hub picker; the download fine print says the
+  hub address is fixed at build time. The hero mock deliberately shows a **message**
+  notification rather than the Electron client's Answer/Decline call card, and the calls
+  section no longer claims ring-from-the-client. If the Electron build ever becomes the
+  published Windows download again, that copy has to move back.
+
+- **The exe embeds `hub.rahiaft.com`** — `tauri.conf.json` hard-codes it as the window URL
+  and there is no picker, so anyone who downloads it opens that host, and the string is
+  permanent in this public repo's history. This was raised and the site owner chose to
+  publish it anyway (2026-07-26). It also means the build is not usable by another team
+  self-hosting their own instance, which sits awkwardly with the rest of the page's pitch
+  — worth revisiting once the hub URL is configurable.
+
+- **Unsigned builds.** The Electron CI sets `CSC_IDENTITY_AUTO_DISCOVERY: false`, and the
+  Tauri exe is unsigned too. The download section says so and warns about the SmartScreen
   prompt. Only flip `desktopSigned` in `src/site.js` when real signing exists.
-- **macOS and Linux are "In progress", not "Planned"**, because the CI matrix already
-  builds a `.dmg` and an `.AppImage` — they are unsigned and untagged, not unwritten.
-  Android and iOS are "Planned" and have no code.
+
+- **macOS and Linux are "In progress", not "Planned"**, because the Electron CI matrix
+  already builds a `.dmg` and an `.AppImage` — they are unsigned and untagged, not
+  unwritten. Android and iOS are "Planned" and have no code.
 - **Capabilities deliberately not claimed.** The project's phase 7 (audit trails,
   retention policy, DLP, end-to-end encryption, guest access, native mobile apps) has not
   started, so none of it appears on the page or in the JSON-LD `featureList`.

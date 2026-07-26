@@ -35,7 +35,7 @@ const dl = primaryPlatform ? downloadUrl(primaryPlatform) : '#download';
         </div>
 
         <p class="fine">
-          {primaryPlatform?.size} · portable, no installer. <a href="#download"
+          {primaryPlatform?.size} · one file, no installer. <a href="#download"
             >Other platforms</a
           >
         </p>
@@ -102,19 +102,19 @@ const dl = primaryPlatform ? downloadUrl(primaryPlatform) : '#download';
           </div>
         </div>
 
-        <!-- v0.3.0's headline desktop feature: a rich native call notification. -->
+        <!-- A message notification, deliberately: the Windows build on the download
+             page does native OS notifications, but not the Electron client's rich
+             call cards with Answer/Decline, so showing those would promise a
+             capability the downloadable app does not have (MANIFEST §1.5). -->
         <div class="notif">
           <div class="notif-top">
             <Avatar person={people.ali} />
             <div class="notif-txt">
               <p class="notif-title">{people.ali.name}</p>
-              <p class="notif-sub">Incoming call · # {workspace.channel}</p>
+              <p class="notif-sub"># {workspace.channel}</p>
             </div>
           </div>
-          <div class="notif-actions">
-            <span class="na na-yes">Answer</span>
-            <span class="na na-no">Decline</span>
-          </div>
+          <p class="notif-body">Found it — the staging proxy caps the body at 32 MB.</p>
         </div>
       </div>
     </div>
@@ -413,28 +413,10 @@ const dl = primaryPlatform ? downloadUrl(primaryPlatform) : '#download';
     text-overflow: ellipsis;
   }
 
-  .notif-actions {
-    margin-top: 11px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 7px;
-  }
-
-  .na {
-    text-align: center;
-    padding: 6px 0;
-    border-radius: 7px;
+  .notif-body {
+    margin-top: 9px;
     font-size: 0.73rem;
-    font-weight: 600;
-  }
-
-  .na-yes {
-    background: var(--mint);
-    color: #04231f;
-  }
-
-  .na-no {
-    border: 1px solid var(--border-strong);
+    line-height: 1.5;
     color: var(--text-2);
   }
 

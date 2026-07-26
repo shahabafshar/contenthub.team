@@ -4,16 +4,16 @@
 export const siteName = 'ContentHub';
 export const domain = 'contenthub.team';
 
-// This site's own public repo. Desktop builds are attached to ITS GitHub Releases
-// because (a) the application source repo is private, so its release assets are not
-// publicly downloadable, and (b) the build is ~74 MB — far over Cloudflare's per-file
-// static-asset limit, so it cannot be served out of this site's own `dist/`.
+// This site's own public repo. Builds too large to serve from `dist/` are attached to
+// ITS GitHub Releases rather than the application repo's, because the application repo
+// is private and its release assets are not publicly downloadable.
 export const repoUrl = 'https://github.com/shahabafshar/contenthub.team';
 export const releasesUrl = `${repoUrl}/releases`;
 const downloadBase = `${repoUrl}/releases/latest/download`;
 
-// Desktop shell version. Tracks `desktop/package.json` in the application repo —
-// bump it here when a new release is published.
+// Desktop version. Tracks `desktop-win/src-tauri/tauri.conf.json` (and
+// `desktop/package.json`) in the application repo — bump it here when a new build ships,
+// and the site-hosted download path below follows automatically, so no cache goes stale.
 export const desktopVersion = '0.3.0';
 
 // Builds are produced unsigned (no code-signing certificates in CI), which is why the
@@ -26,8 +26,13 @@ export const desktopSigned = false;
  * the buttons stay on the page so the roadmap is visible, but nothing pretends to be
  * downloadable before it exists.
  *
- * `file` is pre-filled from the electron-builder `artifactName` config in the app repo
- * (`${productName}.${ext}`), so publishing a platform is a one-word edit here.
+ * Two ways to serve a build:
+ *   `path` — served by this site out of `public/`. Only viable under Cloudflare's
+ *            25 MiB per-file asset limit, which the 2.6 MB Windows build is well
+ *            inside. No external host, and the link works the moment the site deploys.
+ *   `file` — a GitHub release asset on this repo, for anything too large for `path`.
+ *            Pre-filled from the electron-builder `artifactName` config in the app repo
+ *            (`${productName}.${ext}`), so publishing a platform is a one-word edit.
  */
 export const platforms = [
   {
@@ -35,9 +40,9 @@ export const platforms = [
     name: 'Windows',
     icon: 'windows',
     detail: 'Windows 10 & 11 · 64-bit',
-    note: 'Portable single .exe, 74 MB — no installer, no admin rights.',
-    file: 'ContentHub.exe',
-    size: '74 MB',
+    note: 'One 2.6 MB .exe — no installer, no admin rights. Uses the WebView2 runtime already on Windows 10 and 11.',
+    path: `/download/ContentHub-${desktopVersion}.exe`,
+    size: '2.6 MB',
     available: true,
     match: 'Windows',
   },
@@ -87,7 +92,14 @@ export const platforms = [
 
 export const primaryPlatform = platforms.find((p) => p.available) ?? null;
 
-/** Absolute download URL for a platform, or null when it has no published build. */
+/** Download URL for a platform, or null when it has no published build. */
 export function downloadUrl(platform) {
-  return platform.available && platform.file ? `${downloadBase}/${platform.file}` : null;
+  if (!platform.available) return null;
+  if (platform.path) return platform.path;
+  return platform.file ? `${downloadBase}/${platform.file}` : null;
+}
+
+/** True when the build is served by this site, so the link can carry `download`. */
+export function isSelfHosted(platform) {
+  return Boolean(platform.path);
 }

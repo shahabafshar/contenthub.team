@@ -1,6 +1,13 @@
 ---
 import PlatformIcon from './PlatformIcon.astro';
-import { platforms, downloadUrl, desktopVersion, desktopSigned, releasesUrl } from '../site.js';
+import {
+  platforms,
+  downloadUrl,
+  isSelfHosted,
+  desktopVersion,
+  desktopSigned,
+  releasesUrl,
+} from '../site.js';
 ---
 
 <section class="section" id="download">
@@ -9,9 +16,10 @@ import { platforms, downloadUrl, desktopVersion, desktopSigned, releasesUrl } fr
       <span class="eyebrow">Download</span>
       <h2>Get the desktop client</h2>
       <p>
-        A native shell around the hub: it lives in the tray, keeps unread counts on the
-        taskbar, rings for calls, and draws real notification cards instead of browser
-        toasts. On first launch it asks which hub to connect to.
+        A real application rather than a browser tab, and a small one: it renders through
+        the WebView2 runtime Windows already ships with instead of carrying its own copy
+        of Chromium, so the whole download is 2.6 MB. It runs as a single instance, keeps
+        a tray icon, and needs no installer.
       </p>
     </div>
 
@@ -33,7 +41,11 @@ import { platforms, downloadUrl, desktopVersion, desktopSigned, releasesUrl } fr
               <p class="note">{pf.note}</p>
 
               {href ? (
-                <a class="btn btn-primary act" href={href} data-track={`download-${pf.id}`}>
+                <a
+                  class="btn btn-primary act"
+                  href={href}
+                  download={isSelfHosted(pf) ? '' : undefined}
+                  data-track={`download-${pf.id}`}>
                   <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
                     <path d="M12 3a1 1 0 0 1 1 1v9.6l3.3-3.3a1 1 0 0 1 1.4 1.4l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 0 1 1.4-1.4L11 13.6V4a1 1 0 0 1 1-1Z" />
                     <path d="M4 19a1 1 0 0 1 1-1h14a1 1 0 0 1 0 2H5a1 1 0 0 1-1-1Z" />
@@ -54,7 +66,9 @@ import { platforms, downloadUrl, desktopVersion, desktopSigned, releasesUrl } fr
     <div class="meta reveal">
       <p>
         <strong>Version {desktopVersion}</strong> — an early release, still on a
-        <code>0.x</code> version for a reason. <a href={releasesUrl}>Release notes</a>.
+        <code>0.x</code> version for a reason. It connects to a hub address set when the
+        build is made; choosing your own hub from the app is on the way, along with unread
+        badges and notification cards. <a href={releasesUrl}>Releases on GitHub</a>.
       </p>
       {
         !desktopSigned && (
@@ -65,8 +79,8 @@ import { platforms, downloadUrl, desktopVersion, desktopSigned, releasesUrl } fr
         )
       }
       <p>
-        No desktop client for your platform yet? The hub is a full web application — every
-        feature on this page works in a browser, and installs to your home screen.
+        No client for your platform yet? The hub is a full web application — every feature
+        on this page works in a browser, and installs to your home screen.
       </p>
     </div>
   </div>

@@ -13,18 +13,22 @@ npm run build     # production build → dist/
 npm run preview   # serve the production build (needed for verification)
 ```
 
-## Desktop releases
+## Desktop downloads
 
-The download buttons on the site point at **this repo's GitHub Releases**, because the
-application repo is private and the build is too large for Cloudflare's static assets:
+The Windows client ships **inside this repo** at
+`public/download/ContentHub-<version>.exe` and is served by the site itself — it is the
+2.6 MB Tauri/WebView2 build, well inside Cloudflare's 25 MiB per-file asset limit, so
+there is no release to create and the link works as soon as the site deploys.
 
-```
-https://github.com/shahabafshar/contenthub.team/releases/latest/download/ContentHub.exe
-```
+To ship a new version: drop the new exe in `public/download/`, delete the old one, and
+bump `desktopVersion` in `src/site.js` — the URL is derived from it, so no cache goes
+stale.
 
-Attach `ContentHub.exe` (and later `ContentHub.dmg` / `ContentHub.AppImage`) to a release
-here, then bump `desktopVersion` in `src/site.js`. Enabling another platform is a one-word
-change — flip its `available` flag in the same file.
+Larger artefacts (the ~74 MB Electron builds for macOS and Linux) cannot be served this
+way. Those use the `file` field in `src/site.js` instead and must be attached to a GitHub
+release **on this repo**, because the application repo is private and its release assets
+are not publicly downloadable. Enabling any platform is a one-word change — flip its
+`available` flag.
 
 ## Before reporting a change as done
 
