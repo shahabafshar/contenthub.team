@@ -1,12 +1,13 @@
 /**
  * The single worked example the whole page is built around (MANIFEST §6.2, §6.3).
  *
- * One coherent arc, start to finish: a bug is reported in a channel, diagnosed in a
- * thread, audited with the AI assistant's tool loop, settled on a call, and written up
- * as a published release note — which is the payoff artefact at the bottom of the page.
+ * One coherent arc, start to finish: a bug is reported in a channel, confirmed by QA and
+ * by support, diagnosed in a thread, audited with the AI assistant's tool loop, settled on
+ * a call, and written up as a published release note — which is the payoff artefact at the
+ * bottom of the page.
  *
- * It is illustrative, not a transcript of anything real, and every surface that renders
- * it is labelled "Demo" (MANIFEST §1.6). Rewrite it here and the entire page follows.
+ * It is illustrative, not a transcript of anything real, and every surface that renders it
+ * is labelled "Demo" (MANIFEST §1.6). Rewrite it here and the entire page follows.
  *
  * Text supports single backticks for inline code; see components/Rich.astro.
  */
@@ -19,21 +20,40 @@ export const workspace = {
 };
 
 export const people = {
-  mina: { name: 'Mina Rostami', first: 'Mina', role: 'Platform', initials: 'MR', hue: 247, presence: 'online' },
-  ali: { name: 'Ali Karimi', first: 'Ali', role: 'Backend', initials: 'AK', hue: 168, presence: 'online' },
-  sara: { name: 'Sara Taheri', first: 'Sara', role: 'Documentation', initials: 'ST', hue: 292, presence: 'away' },
-  omid: { name: 'Omid Nazari', first: 'Omid', role: 'QA', initials: 'ON', hue: 32, presence: 'online' },
+  marta: { name: 'Marta Kowalczyk', first: 'Marta', role: 'Platform', initials: 'MK', hue: 247, presence: 'online' },
+  daniel: { name: 'Daniel Okoro', first: 'Daniel', role: 'Backend', initials: 'DO', hue: 168, presence: 'online' },
+  sofia: { name: 'Sofia Ferrara', first: 'Sofia', role: 'Documentation', initials: 'SF', hue: 292, presence: 'away' },
+  kenji: { name: 'Kenji Tanaka', first: 'Kenji', role: 'QA', initials: 'KT', hue: 32, presence: 'online' },
+  layla: { name: 'Layla Haddad', first: 'Layla', role: 'Support', initials: 'LH', hue: 340, presence: 'online' },
   assistant: { name: 'Assistant', first: 'Assistant', role: 'AI', initials: 'AI', hue: 205, bot: true, presence: 'online' },
 };
 
 /**
- * Beats, in the order they play. `reactions` and `thread` render immediately after
- * their own message, which is also the order the demo reveals them in.
+ * The line Layla writes, kept here because two components render it: the conversation
+ * itself, and the section that shows why `dir="auto"` gets it wrong.
+ *
+ * It opens with a Latin product name and continues in Arabic, which is exactly the shape
+ * `dir="auto"` mishandles — it decides from the "P" of "Power" alone and declares the whole
+ * sentence left-to-right.
+ *
+ * Keep it SHORT enough to sit on one line in the comparison panels. Once it wraps, both
+ * panels fill their width, the two layouts stop looking different, and the side-by-side
+ * stops demonstrating anything.
+ */
+export const bidiLine = {
+  text: 'Power BI — التقارير الكبيرة تفشل منذ أمس.',
+  lang: 'ar',
+  gloss: 'Power BI — large reports have been failing since yesterday.',
+};
+
+/**
+ * Beats, in the order they play. `reactions` and `thread` render immediately after their
+ * own message, which is also the order the demo reveals them in.
  */
 export const stream = [
   {
     kind: 'message',
-    from: 'mina',
+    from: 'marta',
     time: '09:12',
     body: 'Staging is on 2.4.0-rc3. Uploads over about 40 MB fail at 100% — the progress bar completes, then the document never appears in the folder.',
     // Drawn as an SVG glyph rather than the 👀 character: the emoji renders as a
@@ -42,30 +62,38 @@ export const stream = [
   },
   {
     kind: 'message',
-    from: 'omid',
+    from: 'kenji',
     time: '09:13',
     body: 'Same here. Nothing in the backend log at all, which is the odd part.',
   },
   {
     kind: 'message',
-    from: 'ali',
+    from: 'layla',
+    time: '09:15',
+    body: bidiLine.text,
+    lang: bidiLine.lang,
+    gloss: bidiLine.gloss,
+  },
+  {
+    kind: 'message',
+    from: 'daniel',
     time: '09:16',
     body: 'Found it. `client_max_body_size` is still `32m` on the staging proxy. nginx truncates the POST, DRF sees a short body and returns 400 before our view ever runs — so the failure is in the proxy log, not ours. Production is `512m`.',
     thread: {
       count: 3,
       replies: [
         {
-          from: 'sara',
+          from: 'sofia',
           time: '09:18',
           body: 'Reproduced with a 47 MB PDF. Same 400, same silence in the app log.',
         },
         {
-          from: 'ali',
+          from: 'daniel',
           time: '09:19',
           body: 'Patching staging now. It only ever affected staging.',
         },
         {
-          from: 'mina',
+          from: 'marta',
           time: '09:20',
           body: "Let's pin the value in the deploy compose as well, so the two environments can't drift apart again.",
         },
@@ -74,7 +102,7 @@ export const stream = [
   },
   {
     kind: 'assistant',
-    from: 'mina',
+    from: 'marta',
     time: '09:24',
     ask: '@assistant where else is an upload limit configured?',
     steps: [
@@ -91,16 +119,16 @@ export const stream = [
   },
   {
     kind: 'call',
-    from: 'ali',
+    from: 'daniel',
     time: '09:29',
     title: 'Release 2.4 — upload limits',
-    participants: ['ali', 'mina', 'sara'],
+    participants: ['daniel', 'marta', 'sofia'],
     duration: '6 min',
     detail: 'Screen share · staging nginx config',
   },
   {
     kind: 'message',
-    from: 'mina',
+    from: 'marta',
     time: '09:41',
     body: 'Agreed on the call: one limit, one place, pinned in the deploy compose. Written up in the release note below.',
     receipt: { seen: 9 },
@@ -114,7 +142,7 @@ export const stream = [
 export const releaseNote = {
   breadcrumb: ['Platform', 'Release notes'],
   title: 'Upload limits now live in one place',
-  author: 'mina',
+  author: 'marta',
   date: '24 July 2026',
   version: '2.4.0',
   tags: ['release-2.4', 'infrastructure'],

@@ -2,6 +2,7 @@
 import Avatar from './Avatar.astro';
 import Rich from './Rich.astro';
 import { people, workspace, stream } from '../conversation.js';
+import { textDirection } from '../bidi.js';
 
 /**
  * The page's main demo. Every beat is server-rendered in document order and the
@@ -38,10 +39,10 @@ const p = (key) => people[key];
             <p class="chan-topic">{workspace.topic}</p>
           </div>
           <div class="chan-people">
-            <Avatar person={p('mina')} size="sm" showPresence />
-            <Avatar person={p('ali')} size="sm" showPresence />
-            <Avatar person={p('sara')} size="sm" showPresence />
-            <Avatar person={p('omid')} size="sm" showPresence />
+            <Avatar person={p('marta')} size="sm" showPresence />
+            <Avatar person={p('daniel')} size="sm" showPresence />
+            <Avatar person={p('sofia')} size="sm" showPresence />
+            <Avatar person={p('kenji')} size="sm" showPresence />
             <span class="chan-count">{workspace.members}</span>
           </div>
         </div>
@@ -61,9 +62,18 @@ const p = (key) => people[key];
                         <span class="role">{who.role}</span>
                         <time>{beat.time}</time>
                       </p>
-                      <p class="body">
+                      {/* Direction comes from the majority script, computed the same
+                          way the app computes it — see src/bidi.js. */}
+                      <p class="body" dir={textDirection(beat.body)} lang={beat.lang}>
                         <Rich text={beat.body} />
                       </p>
+
+                      {beat.gloss && (
+                        <p class="gloss" lang="en">
+                          <span class="sr-only">Translation: </span>
+                          {beat.gloss}
+                        </p>
+                      )}
 
                       {beat.reactions && (
                         <p class="reacts" data-beat data-wait="700">
@@ -536,6 +546,26 @@ const p = (key) => people[key];
 
   .body-sm {
     font-size: 0.9rem;
+  }
+
+  /* Arabic ascenders and descenders need more room than Latin at the same size.
+     Deliberately NO `unicode-bidi: plaintext` here: plaintext re-derives the
+     paragraph direction from the first strong character, which is precisely the
+     first-strong-character behaviour the majority rule exists to override — it
+     silently undid `dir="rtl"` and left the line laid out and aligned LTR. */
+  .body[dir="rtl"] {
+    font-size: 1rem;
+    line-height: 1.85;
+    text-align: right;
+  }
+
+  /* A plain-English rendering of the non-Latin line, so the page stays readable to
+     everyone without implying the product translates anything. */
+  .gloss {
+    margin-top: 5px;
+    font-size: 0.82rem;
+    font-style: italic;
+    color: var(--text-3);
   }
 
   .mention {

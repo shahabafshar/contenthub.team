@@ -67,10 +67,11 @@ contact form, because none of those exist yet.
   src/
     site.js            outbound URLs, download targets, per-platform availability
     conversation.js    the single worked example (see Design intent)
+    bidi.js            majority-script direction, mirroring the app's own algorithm
     layouts/BaseLayout.astro   SEO contract, JSON-LD, reveal observer
     components/
       Header.astro Hero.astro ChatDemo.astro Payoff.astro Calls.astro
-      Features.astro SelfHosted.astro Download.astro Footer.astro
+      Script.astro Features.astro SelfHosted.astro Download.astro Footer.astro
       Avatar.astro Logo.astro PlatformIcon.astro Rich.astro
     pages/index.astro  404.astro
     styles/global.css  tokens, base, layout helpers, shared app chrome
@@ -85,13 +86,17 @@ contact form, because none of those exist yet.
 
 ## Design intent
 
-**One coherent example, kept in `src/conversation.js`** (MANIFEST §6.2–6.3). A morning in
-a `#release-2-4` channel: Mina reports that uploads over 40 MB fail at 100%; Omid
-confirms; Ali finds a 32 MB `client_max_body_size` left on the staging proxy and works it
-out in a thread; the AI assistant is asked where else an upload limit is set and answers
-by calling three tools; a six-minute call settles it; and the outcome is a published
-release note. That release note is the payoff section (§6.5), rendered the way a reader
-consumes it.
+**One coherent example, kept in `src/conversation.js`** (MANIFEST §6.2–6.3). A morning in a
+`#release-2-4` channel: Marta reports that uploads over 40 MB fail at 100%; Kenji confirms;
+Layla adds the customer-facing impact in Arabic; Daniel finds a 32 MB `client_max_body_size`
+left on the staging proxy and works it out in a thread; the AI assistant is asked where else
+an upload limit is set and answers by calling three tools; a six-minute call settles it; and
+the outcome is a published release note. That release note is the payoff section (§6.5),
+rendered the way a reader consumes it.
+
+The cast is deliberately international — the team is meant to read as one that spans
+countries and scripts, which is what makes the bidi section below belong to the same story
+rather than sitting beside it.
 
 The same story runs through every section deliberately: the calls section's shared screen
 is the *same* nginx config from the thread, so the page reads as one morning rather than a
@@ -117,6 +122,32 @@ painted in a background colour, since those chips sit on several different backg
 **Reactions are SVG, not emoji.** The `👀` character renders as a tofu box on machines
 without a colour emoji font — including the headless Chromium used for verification — so
 the reaction chip draws its own eyes glyph.
+
+**The mixed-script section is a live demonstration, not a mockup.** `Script.astro` renders
+the *same string* twice and changes only the `dir` attribute, so the visitor's own browser
+performs the bug and the fix. `dir="auto"` resolves direction from the first strong
+character — the "P" of "Power" — and lays a mostly-Arabic sentence out left-to-right;
+counting strong characters instead gives the direction it was written in. `src/bidi.js` is
+the same algorithm the app uses in
+`frontend/src/components/messenger/MessageArea.jsx`, kept identical on purpose.
+
+Three traps found while building it, all of which silently destroy the demo:
+
+- **Never add `unicode-bidi: plaintext`** to these lines. It re-derives the paragraph
+  direction from the first strong character, which is exactly the behaviour the majority
+  rule exists to override — it made `dir="rtl"` report correctly in `getComputedStyle`
+  while the line still rendered flush-left. Removed; `dir` plus an explicit
+  `text-align: right` drives it.
+- **The line must not wrap.** Two wrapped lines fill both bubbles and the layouts stop
+  looking different, so the comparison demonstrates nothing. `bidiLine` is kept short and
+  the font steps down under 460px; the harness asserts one line in each panel.
+- **Computed `direction` is not proof.** The harness measures where the ink actually
+  starts with a `Range`, because the property can read `rtl` while nothing moved.
+
+**What is deliberately not claimed:** there is no translated interface. The project has no
+i18n library and no locale catalogues (`LANGUAGE_CODE = 'en-us'`), so the section says
+plainly that the UI is English and this is about the text a team writes. Do not upgrade
+that into a localisation claim.
 
 ## SEO
 

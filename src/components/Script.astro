@@ -1,0 +1,282 @@
+---
+import Avatar from './Avatar.astro';
+import { people, bidiLine } from '../conversation.js';
+import { textDirection, scriptCounts } from '../bidi.js';
+
+/**
+ * Not a mockup: both panels below render the *same string* and differ only in their
+ * `dir` attribute, so the browser reading this page performs the bug and the fix live.
+ *
+ * `dir="auto"` decides from the first strong directional character — the "P" of "Power" —
+ * and lays the whole line out left-to-right. Counting strong characters instead gives
+ * the direction the sentence is actually written in. That is what the app does, and
+ * `src/bidi.js` is the same algorithm.
+ */
+const { rtl, ltr } = scriptCounts(bidiLine.text);
+const majority = textDirection(bidiLine.text);
+---
+
+<section class="section" id="script">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Mixed scripts</span>
+      <h2>A message written in Arabic stays written in Arabic</h2>
+      <p>
+        Teams do not all write in one script, and the awkward case is not a whole message
+        in another language — it is a sentence that mixes them. Both panels below hold the
+        identical string. Only the direction rule differs.
+      </p>
+    </div>
+
+    <div class="compare reveal">
+      <div class="panel is-wrong">
+        <p class="tag">
+          <span class="mark" aria-hidden="true">✕</span>
+          <code>dir="auto"</code> — the browser default
+        </p>
+        <div class="bubble">
+          <p class="line" dir="auto" lang={bidiLine.lang}>{bidiLine.text}</p>
+        </div>
+        <p class="why">
+          Resolves from the first strong character — the <b>P</b> of “Power” — and lays the
+          whole sentence out left-to-right. The Arabic clause ends up on the wrong side of
+          the product name, and the full stop on the wrong end of the sentence.
+        </p>
+      </div>
+
+      <div class="panel is-right">
+        <p class="tag">
+          <span class="mark" aria-hidden="true">✓</span>
+          Majority script — what ContentHub does
+        </p>
+        <div class="bubble">
+          <p class="line" dir={majority} lang={bidiLine.lang}>{bidiLine.text}</p>
+        </div>
+        <p class="why">
+          Counts strong characters — <b>{rtl}</b> right-to-left against <b>{ltr}</b>
+          {' '}left-to-right — and lays the line out the way it was written, reading from the
+          right, with the Latin product name correctly embedded inside it.
+        </p>
+      </div>
+    </div>
+
+    <div class="split notes">
+      <div class="split-copy reveal">
+        <h3>Where the rule applies</h3>
+        <p>
+          Direction is decided per block, not per message, so a single reply can hold an
+          English paragraph, an Arabic one and a table without any of them fighting each
+          other.
+        </p>
+        <ul class="split-list">
+          <li>
+            Every paragraph, heading, list and table cell re-detects its own direction
+          </li>
+          <li>
+            Code and command output are pinned left-to-right, so a snippet never mirrors
+            inside a right-to-left reply
+          </li>
+          <li>
+            Quoted replies and forwarded messages keep the direction of what they quote
+          </li>
+          <li>
+            Single newlines stay real line breaks, so a numbered list written in Arabic
+            does not collapse into one run-on paragraph
+          </li>
+        </ul>
+        <p class="caveat">
+          To be clear about what this is not: the interface itself is English. This is about
+          the text your team writes, which is where mixed scripts actually show up.
+        </p>
+      </div>
+
+      <div class="split-media reveal" aria-hidden="true">
+        <div class="window">
+          <div class="window-bar">
+            <span class="window-dots"><i></i><i></i><i></i></span>
+            <span class="window-title">Reply · mixed blocks</span>
+            <span class="tag-demo">Demo</span>
+          </div>
+          <div class="mix">
+            <div class="m">
+              <Avatar person={people.layla} size="sm" />
+              <div class="m-main">
+                <p class="m-who">{people.layla.first}</p>
+                <p class="m-line" dir="rtl" lang="ar">التقارير الكبيرة تفشل عند ٤٠ ميغابايت.</p>
+                <p class="m-line" dir="ltr">Reproduced on staging, not on production.</p>
+                <pre class="m-code" dir="ltr">client_max_body_size 32m;</pre>
+                <p class="m-line" dir="rtl" lang="ar">هل نثبّت القيمة في ملف الإعداد؟</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    max-width: 900px;
+    margin: 0 auto 64px;
+  }
+
+  .panel {
+    padding: 20px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .is-wrong {
+    border-color: var(--danger-line);
+  }
+
+  .is-right {
+    border-color: color-mix(in srgb, var(--mint) 46%, transparent);
+  }
+
+  .tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: var(--text-2);
+  }
+
+  .tag code {
+    background: none;
+    color: inherit;
+    padding: 0;
+  }
+
+  .mark {
+    flex: none;
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 0.68rem;
+    font-weight: 800;
+  }
+
+  .is-wrong .mark {
+    background: var(--danger-soft);
+    color: var(--danger);
+  }
+
+  .is-right .mark {
+    background: var(--mint-soft);
+    color: var(--mint);
+  }
+
+  /* The bubble is intentionally plain — the only thing on show is the layout of
+     the text inside it. */
+  .bubble {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+  }
+
+  /* No `unicode-bidi: plaintext`: it would re-derive direction from the first
+     strong character and make both panels render identically, which is the whole
+     thing this comparison exists to show. `dir` alone drives the layout. */
+  .line {
+    font-size: 1.02rem;
+    line-height: 1.85;
+    color: var(--text);
+  }
+
+  .why {
+    margin-top: 14px;
+    font-size: 0.89rem;
+    line-height: 1.6;
+    color: var(--text-2);
+  }
+
+  .why b {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .notes {
+    align-items: center;
+  }
+
+  .caveat {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 0.9rem;
+    color: var(--text-3);
+  }
+
+  /* ── mixed-block mock ── */
+  .mix {
+    padding: 18px 16px;
+    background: var(--surface);
+  }
+
+  .m {
+    display: flex;
+    gap: 11px;
+  }
+
+  .m-main {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .m-who {
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .m-line {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--text-2);
+  }
+
+  .m-line[dir="rtl"] {
+    line-height: 1.9;
+    text-align: right;
+  }
+
+  .m-code {
+    margin-top: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    color: var(--text-2);
+    overflow-x: auto;
+    text-align: left;
+  }
+
+  @media (max-width: 780px) {
+    .compare {
+      grid-template-columns: 1fr;
+      margin-bottom: 46px;
+    }
+  }
+
+  /* The comparison only reads while the line fits on ONE line — two wrapped lines
+     fill the bubble in both panels and the alignment difference disappears. Step the
+     size down on narrow screens rather than let it wrap. */
+  @media (max-width: 460px) {
+    .line {
+      font-size: 0.88rem;
+    }
+  }
+</style>
