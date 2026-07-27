@@ -16,7 +16,7 @@ npm run preview   # serve the production build (needed for verification)
 ## Desktop downloads
 
 The Windows client ships **inside this repo** and is served by the site itself — it is the
-2.6 MB Tauri/WebView2 build, well inside Cloudflare's 25 MiB per-file asset limit, so there
+4 MB Tauri/WebView2 build, well inside Cloudflare's 25 MiB per-file asset limit, so there
 is no release to create and the link works as soon as the site deploys:
 
 ```

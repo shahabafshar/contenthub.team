@@ -1,0 +1,136 @@
+---
+/**
+ * Back-to-top control for long pages.
+ *
+ * It is a plain anchor to `#top`, so it works with no JavaScript at all —
+ * there is no click handler and nothing to initialise. Script only decides
+ * *when* it is visible.
+ *
+ * Progressive enhancement (MANIFEST §8.1): with scripting off the link is
+ * simply always visible. That is a working control, not a dead one, which is
+ * the right failure mode — hiding it by default and revealing it with script
+ * would leave no way back to the top when the script does not run.
+ *
+ * Motion (MANIFEST §8.2): the scroll itself is the browser's, driven by
+ * `html { scroll-behavior: smooth }` in global.css, which is already switched
+ * to `auto` under `prefers-reduced-motion`. Nothing here needs to know.
+ *
+ * Requires `id="top"` on an element at the top of the document — BaseLayout
+ * puts it on the skip-link target's wrapper.
+ */
+---
+
+<a class="to-top" href="#top" aria-label="Back to top" data-to-top>
+  <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path
+      d="M12 5.5 5.7 11.8a1 1 0 0 0 1.4 1.4l4.9-4.9 4.9 4.9a1 1 0 0 0 1.4-1.4L12 5.5Z"
+      fill="currentColor"></path>
+    <path
+      d="M11 8.5h2V19a1 1 0 1 1-2 0V8.5Z"
+      fill="currentColor"></path>
+  </svg>
+</a>
+
+<style>
+  .to-top {
+    position: fixed;
+    right: clamp(14px, 3vw, 28px);
+    bottom: clamp(14px, 3vw, 28px);
+    z-index: 90;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+
+    border-radius: 50%;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text-2);
+    box-shadow: var(--shadow-card);
+    text-decoration: none;
+
+    transition: opacity 0.2s ease, transform 0.2s ease, background 0.15s ease,
+      color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .to-top:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  /* Hidden until the visitor has scrolled — but ONLY when script is running to
+     turn it back on. Never unscope these two rules (MANIFEST §8.1).
+
+     `visibility` matters as much as `opacity` here: an opacity-0 link is still
+     in the tab order, so a keyboard user would otherwise land on an invisible
+     control. Transitioning visibility with a delay equal to the fade keeps the
+     animation while still removing it from the accessibility tree when out.
+
+     `.js` MUST be wrapped in `:global()`. Astro scopes every compound in a
+     selector, so a bare `.js .to-top` compiles to
+     `.js[data-astro-cid-x] .to-top[data-astro-cid-x]` — and `<html class="js">`
+     carries no cid, so the rule silently never matches and the control is
+     stuck visible (MANIFEST §11). */
+  :global(.js) .to-top {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px) scale(0.94);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
+  }
+
+  :global(.js) .to-top.is-on {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    pointer-events: auto;
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0s,
+      background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .to-top {
+      transition: opacity 0.2s ease;
+    }
+
+    :global(.js) .to-top {
+      transform: none;
+    }
+  }
+
+  @media print {
+    .to-top {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const btn = document.querySelector<HTMLElement>('[data-to-top]');
+  if (btn) {
+    // Show it once the visitor is a screen and a half down: far enough that
+    // scrolling back is a chore, not so early that it covers the hero.
+    const threshold = () => window.innerHeight * 1.5;
+
+    let ticking = false;
+    const sync = () => {
+      btn.classList.toggle('is-on', window.scrollY > threshold());
+      ticking = false;
+    };
+
+    sync();
+    addEventListener(
+      'scroll',
+      () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(sync);
+      },
+      { passive: true }
+    );
+    addEventListener('resize', sync, { passive: true });
+  }
+</script>

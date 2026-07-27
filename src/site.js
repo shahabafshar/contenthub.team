@@ -46,7 +46,7 @@ export const desktopSigned = false;
  *
  * Two ways to serve a build:
  *   `path` — served by this site out of `public/`. Only viable under Cloudflare's
- *            25 MiB per-file asset limit, which the 2.6 MB Windows build is well
+ *            25 MiB per-file asset limit, which the 4 MB Windows build is well
  *            inside. No external host, and the link works the moment the site deploys.
  *   `file` — a GitHub release asset on this repo, for anything too large for `path`.
  *            Pre-filled from the electron-builder `artifactName` config in the app repo
@@ -58,9 +58,9 @@ export const platforms = [
     name: 'Windows',
     icon: 'windows',
     detail: 'Windows 10 & 11 · 64-bit',
-    note: 'One 2.6 MB .exe — no installer, no admin rights. Uses the WebView2 runtime already on Windows 10 and 11.',
+    note: 'One 4 MB .exe — no installer, no admin rights. Uses the WebView2 runtime already on Windows 10 and 11.',
     path: `/download/${nativeWindowsFile}`,
-    size: '2.6 MB',
+    size: '4 MB',
     available: true,
     match: 'Windows',
   },

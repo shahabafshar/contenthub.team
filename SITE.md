@@ -66,6 +66,7 @@ contact form, because none of those exist yet.
   1. `BaseLayout.astro` — adds `.js` to `<html>` and runs the scroll-reveal observer.
   2. `ChatDemo.astro` — the step engine that plays the conversation, plus thread toggles.
   3. `Download.astro` — marks the card matching the visitor's OS.
+  4. `BackToTop.astro` — a plain `#top` anchor; script only decides when it is visible.
 
   All three are progressive enhancement per MANIFEST §8.1. Every hiding rule is scoped to
   `.js`, so with scripting off the whole transcript is present, thread replies are expanded,
@@ -89,7 +90,7 @@ contact form, because none of those exist yet.
   public/
     og.jpg  robots.txt  assets/
     _headers                            caps /download/* caching so updates are noticed
-    download/ContentHub-Native.exe      the 2.6 MB Windows build, served by this site
+    download/ContentHub-Native.exe      the 4 MB Windows build, served by this site
     download/ContentHub-Native.exe.md5  generated on prebuild — never edit by hand
   scripts/
     write-download-hash.mjs             writes the MD5 sidecars; wired to npm prebuild
@@ -201,7 +202,7 @@ Two mechanisms keep that honest and **must stay wired up**:
 
 **To ship a new build:** copy the new `ContentHub-Native.exe` over the existing one, bump
 `desktopVersion` in `src/site.js` for the version shown on the page, and build. The sidecar
-updates itself. Each new binary adds ~2.6 MB to git history.
+updates itself. Each new binary adds ~4 MB to git history.
 
 `src/site.js` supports two hosting routes, and `downloadUrl()` picks per platform:
 

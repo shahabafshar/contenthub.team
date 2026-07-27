@@ -14,6 +14,35 @@ no local paths, internal hostnames or deployment topology. Tier A — credential
 
 ---
 
+## 2026-07-27 — Published 0.3.1 (4 MB); the size is now a derived fact, not a constant
+
+The Windows client was updated from the 0.3.0 build to **0.3.1**, `996b36a5…`,
+4,196,864 bytes. The earlier entry below quotes 2.6 MB throughout; that was true
+of the 0.3.0 binary and is left standing, because this log is append-only.
+
+Two things this exposed, both now documented in `OPERATIONS.md`:
+
+**`dist/download/` is not the download folder.** A new binary was dropped there
+and nothing happened in git — correctly, because `dist/` is build output:
+gitignored, and wiped by the next `npm run build`. The tracked source is
+`public/download/`. The two paths read identically and the wrong one fails
+silently, so it is now hazard 3 with its own runbook.
+
+**The stated size is a derived fact and must be re-derived on every swap.** It
+appears in four places in the copy plus `softwareVersion` in the JSON-LD. A
+binary swap that leaves them alone ships a false claim on a public page
+(MANIFEST §1.5) and structured data that overstates the shipped version
+(MANIFEST §9). All five were updated to 4 MB / 0.3.1, and the verification now
+asserts that every size on the page matches the bytes actually served.
+
+The site quotes **MiB**, one decimal, trailing `.0` dropped — 2,728,448 → 2.6 MB,
+4,196,864 → 4 MB. Recorded because two plausible conventions differ by 5% here
+and a future editor will otherwise guess.
+
+Rejected: quoting a size range, or dropping the figure. The small download is
+the product's main advantage over the 74 MB Electron build; it earns its place
+on the page and is worth the maintenance.
+
 ## 2026-07-27 — Internal docs live in `_docs/`, written to a public-repo constraint
 
 Adopted the MANIFEST §5 three-document split: `SITE.md` answers *what the site is*,
