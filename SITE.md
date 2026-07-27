@@ -1,24 +1,35 @@
 # SITE.md — contenthub.team
 
-> Source of truth for this website. Read this before changing anything here.
-> The workspace standard is [`../MANIFEST.md`](../MANIFEST.md) — it is binding.
+> Source of truth for **what this site is and how it is configured**. Read this before
+> changing anything here. The workspace standard is [`../MANIFEST.md`](../MANIFEST.md) —
+> it is binding.
+>
+> Two internal documents sit beside it and own different questions (MANIFEST §5):
+> [`_docs/HANDOFF.md`](_docs/HANDOFF.md) — where the work stands, the hazards, and what is
+> blocked on the user. [`_docs/DECISIONS.md`](_docs/DECISIONS.md) — why things are the way
+> they are; read it before changing anything that looks odd. Facts are not duplicated
+> between the three.
 
 ## Identity
 
 - **Domain:** contenthub.team
 - **Represents project:** ContentHub
-- **Project source code:** `D:\_projects\ContentHub` (GitHub `shahabafshar/ContentHub` — **private**)
+- **Project source code:** GitHub `shahabafshar/ContentHub` — **private**. The local
+  checkout path is in the workspace registry, `_WEB/CLAUDE.md`.
+
+  *Deviation from MANIFEST §5.1, which requires the absolute path here:* **this repo is
+  public**, so §5.3 Tier B material is excluded from it. §5.3 is the stricter rule and wins.
+  See `_docs/DECISIONS.md`, 2026-07-27.
 - **What the project is:** A self-hosted team hub — a Django 5 + React application
-  combining real-time channel and direct messaging, threads, reactions and read
-  receipts, group video calls with screen sharing, full-text message search, an AI
-  assistant that calls tools, and content objects (documents, folders, pages,
-  announcements, structured lists). It deploys with Docker Compose behind the operator's
-  own OpenID Connect provider, with no SaaS dependency in the critical path.
-- **App URL:** `https://hub.rahiaft.com` — **verified live** (HTTP 200, checked
-  2026-07-26) but **deliberately not linked from this site**. It is the office1/newport
-  deployment, not a public sign-up destination; per the site owner's decision the public
-  page does not expose it. If a public instance ever exists, add it to `src/site.js`
-  rather than inline in a component.
+  combining real-time channel and direct messaging, threads, reactions and read receipts,
+  group video calls with screen sharing, full-text message search, an AI assistant that
+  calls tools, and content objects (documents, folders, pages, announcements, structured
+  lists). It deploys with Docker Compose behind the operator's own OpenID Connect provider,
+  with no SaaS dependency in the critical path.
+- **App URL:** a live instance exists and was verified reachable on 2026-07-26, but is
+  **deliberately not linked from this site** and is not named in this repo. If a public
+  instance ever exists, add it to `src/site.js` rather than inline in a component. Reasons
+  in `_docs/DECISIONS.md`.
 
 ## Purpose of this site
 
@@ -35,15 +46,15 @@ contact form, because none of those exist yet.
 ## Branding
 
 - **Logo assets:** `public/assets/` — `contenthub-icon.svg` and `contenthub-icon-512.png`
-  are copied verbatim from the app's `frontend/public/icon.svg` and
+  are copied verbatim from the application's own `frontend/public/icon.svg` and
   `frontend/public/icons/icon-512.png`. `apple-touch-icon.png` is the app's 180px icon.
 - **`favicon.svg` is authored here**, not copied: the app icon stacks three cards with
   three accent dots, which turns to mush at 16px. The favicon keeps two cards at higher
   contrast and drops the dots. Verified legible at 16/32/64px.
-- **Colours:** indigo `#4338ca` → violet `#7c3aed` (the app icon's own gradient;
-  `#4338ca` is also the PWA `theme_color`). Mint `#2dd4bf` is the signal colour for
-  presence, live calls and resolved state. Full token set in `src/styles/global.css`,
-  both schemes defined and both visually checked.
+- **Colours:** indigo `#4338ca` → violet `#7c3aed` (the app icon's own gradient; `#4338ca`
+  is also the PWA `theme_color`). Mint `#2dd4bf` is the signal colour for presence, live
+  calls and resolved state. Full token set in `src/styles/global.css`, both schemes defined
+  and both visually checked.
 - **Font:** Inter (Google Fonts).
 - **Tone:** plain and technical. It names real components — nginx, mediasoup, coturn,
   Meilisearch, Celery — because the audience is the person who will run it.
@@ -57,9 +68,9 @@ contact form, because none of those exist yet.
   3. `Download.astro` — marks the card matching the visitor's OS.
 
   All three are progressive enhancement per MANIFEST §8.1. Every hiding rule is scoped to
-  `.js`, so with scripting off the whole transcript is present, thread replies are
-  expanded, and the demo controls and thread toggle are **not rendered at all** rather
-  than shipped inert.
+  `.js`, so with scripting off the whole transcript is present, thread replies are expanded,
+  and the demo controls and thread toggle are **not rendered at all** rather than shipped
+  inert.
 
 - **Structure:**
 
@@ -77,12 +88,19 @@ contact form, because none of those exist yet.
     styles/global.css  tokens, base, layout helpers, shared app chrome
   public/
     og.jpg  robots.txt  assets/
-    _headers                        caps /download/* caching so updates are noticed
+    _headers                            caps /download/* caching so updates are noticed
     download/ContentHub-Native.exe      the 2.6 MB Windows build, served by this site
     download/ContentHub-Native.exe.md5  generated on prebuild — never edit by hand
   scripts/
-    write-download-hash.mjs         writes the MD5 sidecars; wired to npm prebuild
+    write-download-hash.mjs             writes the MD5 sidecars; wired to npm prebuild
+  _docs/
+    HANDOFF.md  DECISIONS.md            internal; committed, never deployed (§5.2)
   ```
+
+  `_docs/` sits at the site root, a sibling of `src/`. Astro emits only `src/pages/` and
+  `public/` into `dist/`, and Cloudflare uploads only `dist/`, so it cannot reach the web.
+  The verifier asserts `/_docs/…` returns a non-200 — check the outcome, do not trust the
+  mechanism.
 
 ## Design intent
 
@@ -94,193 +112,136 @@ an upload limit is set and answers by calling three tools; a six-minute call set
 the outcome is a published release note. That release note is the payoff section (§6.5),
 rendered the way a reader consumes it.
 
-The cast is deliberately international — the team is meant to read as one that spans
-countries and scripts, which is what makes the bidi section below belong to the same story
-rather than sitting beside it.
-
-The same story runs through every section deliberately: the calls section's shared screen
-is the *same* nginx config from the thread, so the page reads as one morning rather than a
-set of unrelated screenshots. Rewrite `conversation.js` and the whole page follows.
+The cast is deliberately international, and the same story runs through every section: the
+calls section's shared screen is the *same* nginx config from the thread, so the page reads
+as one morning rather than a set of unrelated screenshots. Rewrite `conversation.js` and the
+whole page follows.
 
 **The main demo genuinely works** (§6.4). Pause holds, Play resumes, Restart clears and
-replays, and it pauses when scrolled out of view — all asserted by script, not by
-inspection. It reveals the first message immediately so the panel is never an empty box.
-Under `prefers-reduced-motion` the whole transcript shows at once and the controls are
-hidden, because a pause button is meaningless with no animation to pause.
+replays, and it pauses when scrolled out of view — all asserted by script, not by inspection.
+It reveals the first message immediately, and unrevealed beats sit at `opacity: 0.06`, so the
+panel is never an empty box. Under `prefers-reduced-motion` the whole transcript shows at
+once and the controls are hidden, because a pause button is meaningless with no animation.
 
-**Mock UI is labelled.** Every simulated app surface carries a small `Demo` tag (§1.6),
-and the purely decorative mocks (hero window, call window) are `aria-hidden` with their
-meaning carried in real headings and copy.
+**The mixed-script section is a live demonstration, not a mockup.** `Script.astro` renders
+the same string twice and changes only the `dir` attribute, so the visitor's own browser
+performs the bug and the fix. `src/bidi.js` is the same majority-script algorithm the app
+uses in `frontend/src/components/messenger/MessageArea.jsx`, kept identical on purpose.
+It demonstrates message direction only — **no localisation is claimed**, because there is
+none. The traps that silently break this section are listed in `_docs/HANDOFF.md`.
+
+**Mock UI is labelled.** Every simulated app surface carries a small `Demo` tag (§1.6), and
+the purely decorative mocks (hero window, call window) are `aria-hidden` with their meaning
+carried in real headings and copy.
 
 **Artwork.** No photographs and no figures. Avatars are initials on a two-stop disc; the
 architecture diagram is HTML chips on a CSS grid with short vertical connectors, so it
 reflows on a phone and themes for free. Nothing in the set is a stroke terminating in a
 circular form, which is the §7.4 hazard. Platform glyphs are fill-based at one optical
-weight, and the Android eyes are knocked out with `fill-rule="evenodd"` rather than
-painted in a background colour, since those chips sit on several different backgrounds.
-
-**Reactions are SVG, not emoji.** The `👀` character renders as a tofu box on machines
-without a colour emoji font — including the headless Chromium used for verification — so
-the reaction chip draws its own eyes glyph.
-
-**The mixed-script section is a live demonstration, not a mockup.** `Script.astro` renders
-the *same string* twice and changes only the `dir` attribute, so the visitor's own browser
-performs the bug and the fix. `dir="auto"` resolves direction from the first strong
-character — the "P" of "Power" — and lays a mostly-Arabic sentence out left-to-right;
-counting strong characters instead gives the direction it was written in. `src/bidi.js` is
-the same algorithm the app uses in
-`frontend/src/components/messenger/MessageArea.jsx`, kept identical on purpose.
-
-Three traps found while building it, all of which silently destroy the demo:
-
-- **Never add `unicode-bidi: plaintext`** to these lines. It re-derives the paragraph
-  direction from the first strong character, which is exactly the behaviour the majority
-  rule exists to override — it made `dir="rtl"` report correctly in `getComputedStyle`
-  while the line still rendered flush-left. Removed; `dir` plus an explicit
-  `text-align: right` drives it.
-- **The line must not wrap.** Two wrapped lines fill both bubbles and the layouts stop
-  looking different, so the comparison demonstrates nothing. `bidiLine` is kept short and
-  the font steps down under 460px; the harness asserts one line in each panel.
-- **Computed `direction` is not proof.** The harness measures where the ink actually
-  starts with a `Range`, because the property can read `rtl` while nothing moved.
-
-**What is deliberately not claimed:** there is no translated interface. The project has no
-i18n library and no locale catalogues (`LANGUAGE_CODE = 'en-us'`), so the section says
-plainly that the UI is English and this is about the text a team writes. Do not upgrade
-that into a localisation claim.
+weight, and the Android eyes are knocked out with `fill-rule="evenodd"` rather than painted
+in a background colour, since those chips sit on several different backgrounds. Reaction
+chips are SVG rather than emoji.
 
 ## SEO
 
 - Meta, Open Graph, Twitter and JSON-LD all live in `src/layouts/BaseLayout.astro`.
-- `trailingSlash: 'never'` in `astro.config.mjs` keeps canonical, `og:url` and the
-  sitemap entry byte-identical.
-- **Social card:** `public/og.jpg` — 1200×630, JPEG quality 86, 56 KB.
+- `trailingSlash: 'never'` in `astro.config.mjs` keeps canonical, `og:url` and the sitemap
+  entry byte-identical.
+- **Social card:** `public/og.jpg` — 1200×630, JPEG quality 86, ~55 KB.
   To regenerate: recreate `src/pages/og.astro` (a 1200×630 `#card` built from the real
   `Logo`, `Avatar` and `conversation.js`), serve the build, screenshot the `#card` element
   with Playwright as JPEG q86 into `public/og.jpg`, then **delete the page again**. Two
   traps: the card hard-codes a dark background, so it must also hard-code `color`, or the
   wordmark inherits the light scheme's near-black text and vanishes; and
   `await document.fonts.ready` before capturing, or it ships in a fallback face.
-- **Structured data asserts:** `WebSite`, and `SoftwareApplication` with name, URL,
-  category, operating systems, `softwareVersion` 0.3.0 and a `featureList` of capabilities
-  that are actually implemented. **Deliberately omits** `offers`, `aggregateRating`,
-  review counts, author, and anything else unverifiable.
-- `robots.txt` in `public/` points at `sitemap-index.xml`; `@astrojs/sitemap` generates
-  the sitemap; `404.astro` is `noindex, follow` and is wired up by
+- **Structured data asserts:** `WebSite`, and `SoftwareApplication` with name, URL, category,
+  operating systems, `softwareVersion` and a `featureList` of capabilities that are actually
+  implemented. **Deliberately omits** `offers`, `aggregateRating`, review counts, author, and
+  anything else unverifiable.
+- `robots.txt` in `public/` points at `sitemap-index.xml`; `@astrojs/sitemap` generates the
+  sitemap; `404.astro` is `noindex, follow` and is wired up by
   `not_found_handling: "404-page"`.
 
 ## Deploy
 
 - **Host:** Cloudflare Workers (git-connected Workers Builds), static assets only
-- **Repo:** https://github.com/shahabafshar/contenthub.team (public)
-- **Config:** `wrangler.jsonc` (name `contenthub-team`, serves `./dist`); `wrangler`
-  pinned as a devDependency
-- **Dashboard:** build `npm run build`; deploy `npx wrangler deploy`; non-production
-  branches `npx wrangler versions upload`; root directory `/`
+- **Repo:** https://github.com/shahabafshar/contenthub.team — **public**, and it must stay
+  that way; the download depends on it. See `_docs/DECISIONS.md`.
+- **Config:** `wrangler.jsonc` (name `contenthub-team`, serves `./dist`); `wrangler` pinned
+  as a devDependency
+- **Dashboard:** build `npm run build`; deploy `npx wrangler deploy`; non-production branches
+  `npx wrangler versions upload`; root directory `/`. **Name the Worker `contenthub-team`,
+  not `contenthub.team`** — `wrangler deploy` reads the name from `wrangler.jsonc` and
+  ignores the dashboard's, so a mismatch deploys to a different Worker than the project.
 - **Flow:** commit → push to `main` → Cloudflare builds and deploys
 
 ### Desktop downloads — served by this site
 
-**The Windows build ships inside this repo** at
-`public/download/ContentHub-Native.exe`, and the button points at the relative path. There
-is no external host and no release to create: the link works the moment Cloudflare deploys.
+The Windows build ships inside this repo at `public/download/ContentHub-Native.exe`, and the
+button points at the relative path. No external host, no release to create:
 
 ```
 https://contenthub.team/download/ContentHub-Native.exe
 https://contenthub.team/download/ContentHub-Native.exe.md5
 ```
 
-That is possible because the download is the **Tauri/WebView2 build** (`desktop-win/` in
-the app repo), not the Electron one. It is **2.6 MB**, comfortably inside Cloudflare's
-25 MiB per-file asset limit, whereas the Electron build is ~74 MB and could never be
-served this way.
+The filename is **fixed** — no version in the path, ever — because the URL is linked from
+outside this site. Freshness comes from the MD5 sidecar instead: it holds the bare lowercase
+digest and nothing else, so a client can compare `(await res.text()).trim()` without parsing,
+and installed clients poll it to detect a new build.
 
-#### The filename is fixed, and the MD5 sidecar is load-bearing
+Two mechanisms keep that honest and **must stay wired up**:
 
-The filename **must stay `ContentHub-Native.exe`**, matching what `build-all.mjs` mirrors
-to `desktop/dist/` in the app repo. No version in the path, ever: the URL is linked from
-outside this site, so it must not change between releases.
+- `scripts/write-download-hash.mjs` rewrites a sidecar for every binary in `public/download/`
+  and runs from npm **`prebuild`**, so `npm run build` — including Cloudflare's — regenerates
+  it and the hash cannot drift from the binary. `npm run download:hash` runs it standalone.
+- `public/_headers` caps `/download/*` at `max-age=300`, with the same max-age on both files
+  so the pair can never be served from different generations. Cloudflare honours this file;
+  `astro preview` ignores it, so the header is only observable on a real deploy.
 
-Because the name is stable, freshness cannot come from the URL. **An MD5 sidecar sits
-beside the binary** at the same name plus `.md5`, holding the bare lowercase 32-character
-digest and a newline — nothing else, so a client can use `(await res.text()).trim()` with
-no parsing. Installed clients poll it to detect that a new build has shipped, which makes
-it part of the update mechanism rather than a nicety: a hash that disagrees with the
-binary beside it either blinds every installed copy to an update or sends it after a build
-that does not exist.
-
-Two things keep that honest, and both must stay wired up:
-
-- **`scripts/write-download-hash.mjs`** rewrites a sidecar for every binary in
-  `public/download/` and runs from npm **`prebuild`**, so `npm run build` — including
-  Cloudflare's — regenerates it. The hash cannot drift from the binary, and nobody has to
-  remember to update it. `npm run download:hash` runs it on its own.
-- **`public/_headers`** caps `/download/*` at `max-age=300`. A long cache would defeat the
-  whole mechanism: a stale `.md5` hides new builds, and a stale `.exe` serves a file whose
-  hash no longer matches. Both use the same max-age so the pair can never come from
-  different generations. Cloudflare honours this file; `astro preview` ignores it, so the
-  header itself is only observable on a real deploy.
-
-To ship a new build: copy `desktop/dist/ContentHub-Native.exe` over the existing one, bump
+**To ship a new build:** copy the new `ContentHub-Native.exe` over the existing one, bump
 `desktopVersion` in `src/site.js` for the version shown on the page, and build. The sidecar
-updates itself. Since the filename never changes, nothing accumulates in the repo — but
-each new binary does add ~2.6 MB to git history.
+updates itself. Each new binary adds ~2.6 MB to git history.
 
-`src/site.js` supports both hosting routes, and `downloadUrl()` picks per platform:
+`src/site.js` supports two hosting routes, and `downloadUrl()` picks per platform:
 
-| Field  | Serves from                          | Use when                                   |
-|--------|--------------------------------------|--------------------------------------------|
-| `path` | this site, out of `public/`           | under 25 MiB — preferred, works instantly  |
-| `file` | a GitHub release asset on this repo   | too large for `path`                       |
+| Field  | Serves from                         | Use when                                  |
+|--------|-------------------------------------|-------------------------------------------|
+| `path` | this site, out of `public/`         | under 25 MiB — preferred, works instantly |
+| `file` | a GitHub release asset on this repo | too large for `path`                      |
 
-`file` is still pre-filled for macOS and Linux from the app's electron-builder
-`artifactName` config, because those are Electron builds and will be far too large to
-self-host. The application repo `shahabafshar/ContentHub` is **private**, so its own
-release assets are not publicly downloadable — an anonymous request 404s. That is why any
-release-hosted artefact must be attached here rather than there.
+`file` is pre-filled for macOS and Linux from the application's electron-builder
+`artifactName` config, because those are Electron builds and far too large to self-host.
+The application repo is private, so its own release assets are not publicly downloadable —
+which is why any release-hosted artefact must be attached here rather than there.
 
 Enabling a platform is a one-word change: flip its `available` flag.
 
 ## Notes / decisions
 
-- **The published Windows client is the Tauri build, and it is not the Electron one.**
-  Per `desktop-win/README.md` its phase 1 covers loading the hub in WebView2,
-  single-instance and a tray icon with Open/Quit. **Not yet ported:** the layered hub
-  config and first-run picker, the unread badge, custom notification cards with the
-  Focus-Assist gate, deep links, start-at-login, and auto-update. Its README also flags
-  camera/microphone permission in WebView2 as "**the #1 thing to verify**", so calls in
-  this build are unconfirmed.
+Reasoning for the choices below lives in [`_docs/DECISIONS.md`](_docs/DECISIONS.md); the
+traps that break things live in [`_docs/HANDOFF.md`](_docs/HANDOFF.md). What follows is only
+what is unverified or pending.
 
-  The page copy was rewritten to match. It no longer claims tray unread counts, call
-  ringing, notification cards or a first-run hub picker; the download fine print says the
-  hub address is fixed at build time. The hero mock deliberately shows a **message**
-  notification rather than the Electron client's Answer/Decline call card, and the calls
-  section no longer claims ring-from-the-client. If the Electron build ever becomes the
-  published Windows download again, that copy has to move back.
-
-- **The exe embeds `hub.rahiaft.com`** — `tauri.conf.json` hard-codes it as the window URL
-  and there is no picker, so anyone who downloads it opens that host, and the string is
-  permanent in this public repo's history. This was raised and the site owner chose to
-  publish it anyway (2026-07-26). It also means the build is not usable by another team
-  self-hosting their own instance, which sits awkwardly with the rest of the page's pitch
-  — worth revisiting once the hub URL is configurable.
-
-- **Unsigned builds.** The Electron CI sets `CSC_IDENTITY_AUTO_DISCOVERY: false`, and the
-  Tauri exe is unsigned too. The download section says so and warns about the SmartScreen
-  prompt. Only flip `desktopSigned` in `src/site.js` when real signing exists.
-
-- **macOS and Linux are "In progress", not "Planned"**, because the Electron CI matrix
-  already builds a `.dmg` and an `.AppImage` — they are unsigned and untagged, not
-  unwritten. Android and iOS are "Planned" and have no code.
-- **Capabilities deliberately not claimed.** The project's phase 7 (audit trails,
-  retention policy, DLP, end-to-end encryption, guest access, native mobile apps) has not
-  started, so none of it appears on the page or in the JSON-LD `featureList`.
-- **A container count was removed from a heading.** An earlier draft read "Nine
-  containers"; the diagram supports no such precise number (worker and beat are one chip;
-  the static frontend and SearXNG are not drawn), so the heading is now "One compose file,
-  and nothing that phones home".
-- **No private project content is published.** Test users, testbed IPs and internal
+- **`contenthub.team` does not resolve yet**, and the site has never been deployed —
+  Cloudflare is not connected. The absolute URLs in meta and JSON-LD are correct for when it
+  is, but no social preview or canonical will work until then.
+- **Calls in the published Windows client are unverified.** Its own README flags WebView2
+  camera/microphone permission as the first thing to check. This gates what the calls section
+  may claim and needs a human to test.
+- **Builds are unsigned** — no certificates exist. The download section says so and warns
+  about the SmartScreen prompt. Only flip `desktopSigned` in `src/site.js` when real signing
+  exists.
+- **The published client's hub address is fixed at build time**, so the download is not yet
+  usable by another team self-hosting their own instance. This is the widest gap between what
+  the page argues and what the download delivers; revisit when the address is configurable.
+- **macOS and Linux are "In progress", not "Planned"** — the Electron CI matrix already builds
+  a `.dmg` and an `.AppImage`; they are unsigned and untagged, not unwritten. Android and iOS
+  are "Planned" and have no code.
+- **Capabilities deliberately not claimed:** the project's unstarted enterprise phase — audit
+  trails, retention policy, DLP, end-to-end encryption, guest access, native mobile apps —
+  appears nowhere on the page or in the JSON-LD `featureList`.
+- **No private project content is published.** Test users, testbed addresses and real
   hostnames are absent. The example conversation uses invented people and a fictional
-  `Northwind Platform` workspace, and its hostnames (`staging.internal`, `hub.internal`)
-  are deliberately generic.
-- The header has no "Sign in" link, by decision — see **App URL** above.
+  `Northwind Platform` workspace, and its hostnames (`staging.internal`, `hub.internal`) are
+  deliberately generic.

@@ -45,10 +45,21 @@ release **on this repo**, because the application repo is private and its releas
 are not publicly downloadable. Enabling any platform is a one-word change — flip its
 `available` flag.
 
+## Documentation
+
+| File | Answers |
+|---|---|
+| [`SITE.md`](SITE.md) | What this site is and how it is configured |
+| [`_docs/HANDOFF.md`](_docs/HANDOFF.md) | Where the work stands, the hazards, what is blocked on the user |
+| [`_docs/DECISIONS.md`](_docs/DECISIONS.md) | Why it is the way it is — read before changing anything that looks odd |
+
+`_docs/` is committed but never deployed. **This repo is public**, so it carries no local
+paths, internal hostnames or secrets — see `_docs/DECISIONS.md`.
+
 ## Before reporting a change as done
 
-Read `SITE.md` for what this site represents, and [`../MANIFEST.md`](../MANIFEST.md) for
-the workspace standard it must meet. Then, against a served build:
+Read `_docs/HANDOFF.md` and `SITE.md`, and [`../MANIFEST.md`](../MANIFEST.md) for the
+workspace standard this must meet. Then, against a served build:
 
 ```bash
 node ../_tools/verify.mjs http://localhost:4321 --out <scratchpad>/verify-out
