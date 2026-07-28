@@ -70,8 +70,10 @@ produced → calls → mixed scripts → features → self-hosting → download.
 - **Deliberately unfinished:** macOS, Linux, Android and iOS are rendered as genuinely
   `disabled` buttons showing real status. That is not a placeholder; it is the honest state.
 
-Last verification (2026-07-27, against a served build): `_tools/verify.mjs` **47 passed,
-0 failed**; project-specific harness **50 passed, 0 failed**. Screenshots reviewed in dark,
+Published Windows build: **0.3.4**, 4,198,400 bytes, md5 `f0501e69…`.
+
+Last verification (2026-07-27, against a served build): `_tools/verify.mjs` **50 passed,
+0 failed**; project-specific harness **51 passed, 0 failed**. Screenshots reviewed in dark,
 light and at 390px.
 
 ---
@@ -117,9 +119,12 @@ Every one of these cost time or shipped a defect during the initial build.
    deploys nothing, and is deleted by the next build. This has already caught
    someone. Full runbook in `OPERATIONS.md`.
 4. **A binary swap changes stated facts.** The download size is quoted in four
-   places (`src/site.js` ×3, `src/components/Download.astro` ×1) and the
-   version in the JSON-LD (`src/layouts/BaseLayout.astro`). Re-derive all five
-   or the page states a false size — MANIFEST §1.5.
+   places (`src/site.js` ×3, `src/components/Download.astro` ×1) — re-derive all
+   four or the page states a false size (MANIFEST §1.5). The **version** is now a
+   single source, `desktopVersion` in `src/site.js`; the hero pill, the download
+   section and the JSON-LD all derive from it. It used to be restated in
+   `BaseLayout.astro`, the two drifted, and the site advertised 0.3.0 while
+   serving 0.3.1. Never reintroduce a second literal. Runbook: `OPERATIONS.md`.
 5. **Never hand-edit the `.md5` sidecar, and keep `prebuild` wired.** Installed clients poll
    it to detect new builds. A hash that disagrees with the binary beside it either blinds
    every installed copy to an update or sends it after a build that does not exist.

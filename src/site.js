@@ -11,9 +11,15 @@ export const repoUrl = 'https://github.com/shahabafshar/contenthub.team';
 export const releasesUrl = `${repoUrl}/releases`;
 const downloadBase = `${repoUrl}/releases/latest/download`;
 
-// Desktop version. Tracks `desktop-win/src-tauri/tauri.conf.json` (and
-// `desktop/package.json`) in the application repo — bump it here when a new build ships.
-export const desktopVersion = '0.3.0';
+// Desktop version, rendered in the hero pill and the download section. It must match the
+// FileVersion of `public/download/ContentHub-Native.exe` — read it with
+// `(Get-Item <path>).VersionInfo.FileVersion`, do not copy it from the app's package.json,
+// which can be ahead of the binary that was actually shipped here.
+//
+// This is one of TWO version strings. The other is `softwareVersion` in
+// `layouts/BaseLayout.astro` (JSON-LD). Bump both together — they drifted once, and the
+// page advertised 0.3.0 while handing out a 0.3.1 binary.
+export const desktopVersion = '0.3.4';
 
 /**
  * The Windows filename is FIXED, deliberately — it matches `build-all.mjs`'s

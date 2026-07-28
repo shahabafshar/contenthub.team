@@ -14,6 +14,33 @@ no local paths, internal hostnames or deployment topology. Tier A — credential
 
 ---
 
+## 2026-07-27 — Published 0.3.4; the version is now derived from one source, not restated
+
+Routine binary swap to **0.3.4**, `f0501e69…`, 4,198,400 bytes — still "4 MB" under the
+MiB rounding rule, so no size copy changed. The entry exists for what the swap uncovered.
+
+`desktopVersion` in `src/site.js` had never been bumped when 0.3.1 shipped. It still read
+`0.3.0`, and it drives the hero pill and the download section, so **the live page advertised
+0.3.0 while handing out a 0.3.1 binary for a full release cycle.** `OPERATIONS.md` step 5
+did not catch it because it only told you to check `softwareVersion` in the JSON-LD — the
+one version string that *had* been updated.
+
+Two literals for one fact is the defect, not the forgetfulness. `softwareVersion` now
+imports `desktopVersion`, so there is a single source and the hero, the download section
+and the structured data cannot disagree. The runbook step was rewritten to say "bump the
+version — one place", and to warn against reintroducing a second literal rather than
+adding another line to a checklist.
+
+This is the same reasoning that put MD5 generation in `prebuild` (2026-07-26): when a fact
+must match in two places, derive it, do not remember it.
+
+Rejected: adding `desktopVersion` to the runbook checklist alongside the JSON-LD — it
+preserves the drift and only shortens the window. Rejected: reading the version out of the
+binary's FileVersion at build time — it would make the site's stated version untrackable in
+git and unreviewable in a diff, and the exe is only present at build time by convention.
+
+---
+
 ## 2026-07-27 — Published 0.3.1 (4 MB); the size is now a derived fact, not a constant
 
 The Windows client was updated from the 0.3.0 build to **0.3.1**, `996b36a5…`,

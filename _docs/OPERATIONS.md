@@ -53,11 +53,24 @@ committed one; git tracks content, not timestamps.)
    The site quotes **MiB** (`bytes / 1048576`), rounded to one decimal and with
    a trailing `.0` dropped: 2,728,448 → "2.6 MB"; 4,196,864 → "4 MB".
 
-5. **Check the version in the JSON-LD.** `softwareVersion` in
-   `src/layouts/BaseLayout.astro` must match the binary's own FileVersion, which
-   you can read on Windows with
-   `(Get-Item <path>).VersionInfo.FileVersion`. Structured data that overstates
-   the shipped version is exactly the dishonesty MANIFEST §9 rules out.
+5. **Bump the version — one place.** `desktopVersion` in `src/site.js` must match
+   the binary's own FileVersion. Read it from the file you just copied:
+
+   ```powershell
+   (Get-Item public/download/ContentHub-Native.exe).VersionInfo.FileVersion
+   ```
+
+   Do **not** take it from the application's `package.json` or `tauri.conf.json`
+   — those can be ahead of the binary actually shipped here.
+
+   `desktopVersion` is the single source: the hero pill, the download section and
+   the JSON-LD `softwareVersion` all derive from it. That was not always true —
+   `BaseLayout.astro` restated the version as its own literal, the two drifted,
+   and the site advertised **0.3.0 while handing out a 0.3.1 binary** for a whole
+   release cycle, because this step only told you to check the JSON-LD. If a
+   second literal version string ever reappears, delete it and derive it instead
+   rather than adding another line to this checklist. A page that overstates the
+   shipped version is the dishonesty MANIFEST §1.5 and §9 rule out.
 
 6. **Build, verify, commit, push.** The binary is committed to this repo, so
    each new build adds its own size to git history permanently — see the
@@ -82,8 +95,9 @@ Then assert, over HTTP:
 - the `.md5` is served and is a bare lowercase 32-character digest;
 - **that digest equals the MD5 of the bytes actually served** — this is the one
   that matters, and it is the reason step 3 exists;
-- every size stated on the page matches the real file, and the superseded
-  figure appears nowhere;
+- every size stated on the page matches the real file, and **the superseded size
+  and version strings appear nowhere in the served HTML** — grep the page for the
+  old numbers rather than only checking that the new ones are present;
 - `public/_headers` still scopes a rule to `/download/*` capping it at
   `max-age=300`;
 - the JSON-LD `softwareVersion` matches the binary.
