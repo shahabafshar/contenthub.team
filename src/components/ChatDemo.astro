@@ -1,7 +1,6 @@
 ---
 import Avatar from './Avatar.astro';
 import Rich from './Rich.astro';
-import AiSteps from './AiSteps.astro';
 import { people, workspace, stream, self } from '../conversation.js';
 import { textDirection } from '../bidi.js';
 
@@ -24,12 +23,11 @@ const isSelf = (key) => key === self;
 <section class="section" id="conversation">
   <div class="container">
     <div class="section-head reveal">
-      <span class="eyebrow">One morning in a channel</span>
+      <span class="eyebrow">Chat · one morning in a channel</span>
       <h2>A bug reported, diagnosed, and written up — without leaving the app</h2>
       <p>
-        One continuous conversation: the report, the fix found in a thread, the assistant
-        working through its own tools before it answers, the call that settled it, and the
-        release note it produced.
+        One continuous conversation: the report, a colleague confirming it, the fix worked
+        out in a thread, the call that settled it, and the release note it produced.
       </p>
     </div>
 
@@ -159,54 +157,6 @@ const isSelf = (key) => key === self;
                 );
               }
 
-              if (beat.kind === 'assistant') {
-                const asker = p(beat.from);
-                const askMine = isSelf(beat.from);
-                return (
-                  <>
-                    <article
-                      class={`beat msg${askMine ? ' is-mine' : ''}`}
-                      data-beat
-                      data-wait="1400"
-                      data-typing={askMine ? undefined : asker.first}>
-                      {!askMine && <Avatar person={asker} size="sm" />}
-                      <div class="col">
-                        {!askMine && <p class="name" style={`--hue:${asker.hue}`}>{asker.name}</p>}
-                        <div class="bubble">
-                          <p class="body">
-                            <span class="mention">@assistant</span>
-                            {beat.ask.replace('@assistant', '')}
-                          </p>
-                        </div>
-                        <p class="meta"><time>{beat.time}</time></p>
-                      </div>
-                    </article>
-
-                    <article class="beat msg is-ai" data-beat data-wait="700">
-                      <Avatar person={p('assistant')} size="sm" />
-                      <div class="col">
-                        <p class="name name-ai">
-                          {people.assistant.name}
-                          <span class="badge-ai">AI</span>
-                        </p>
-                        <div class="bubble bubble-ai">
-                          <AiSteps steps={beat.steps} id="demo" />
-                          <div data-beat data-wait="600" data-ai-answer>
-                            <p class="body">
-                              <Rich text={beat.answer} />
-                            </p>
-                            <p class="cites">
-                              {beat.citations.map((c) => (
-                                <span class={`cite cite-${c.kind}`}>{c.label}</span>
-                              ))}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </article>
-                  </>
-                );
-              }
 
               // kind === 'call'
               return (
@@ -262,240 +212,6 @@ const isSelf = (key) => key === self;
   </div>
 </section>
 
-<script>
-  const PLAY_ICON = '▶';
-  const PAUSE_ICON = '❚❚';
-
-  document.querySelectorAll('[data-demo]').forEach((root) => {
-    const beats = [...root.querySelectorAll('[data-beat]')];
-    const typingRow = root.querySelector('[data-typing-row]');
-    const typingName = root.querySelector('[data-typing-name]');
-    const playBtn = root.querySelector('[data-play]');
-    const playLabel = root.querySelector('[data-play-label]');
-    const playIcon = root.querySelector('[data-play-icon]');
-    const restartBtn = root.querySelector('[data-restart]');
-    const statusEl = root.querySelector('[data-status]');
-    const countEl = root.querySelector('[data-count]');
-    if (!beats.length) return;
-
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
-    let i = 0;
-    let timer = null;
-    let userPaused = false;
-
-    const clear = () => {
-      if (timer) clearTimeout(timer);
-      timer = null;
-    };
-
-    const setTyping = (name) => {
-      if (!typingRow) return;
-      if (name) {
-        typingName.textContent = name;
-        typingRow.classList.add('is-on');
-      } else {
-        typingRow.classList.remove('is-on');
-      }
-    };
-
-    /* ── assistant step rows ──
-       A row is not simply "shown": it runs, then completes. Revealing a row
-       starts it; the row finishes when the engine moves past it, which is what
-       makes the spinner→check swap line up with the timer beside it. */
-    const isRow = (el) => el.classList.contains('row');
-
-    // One ticker for the whole demo: running rows count their elapsed seconds up,
-    // the way the live component does while a tool call is in flight.
-    let rowTicker = null;
-
-    const tickRows = () => {
-      const running = root.querySelectorAll('.row.is-running');
-      if (!running.length) {
-        clearInterval(rowTicker);
-        rowTicker = null;
-        return;
-      }
-      running.forEach((r) => {
-        const dur = r.querySelector('[data-dur]');
-        const t0 = Number(r.dataset.t0);
-        if (dur && t0) dur.textContent = `${Math.max(0, Math.round((Date.now() - t0) / 1000))}s`;
-      });
-    };
-
-    const startRow = (el) => {
-      el.dataset.t0 = String(Date.now());
-      const dur = el.querySelector('[data-dur]');
-      if (dur) dur.textContent = '0s';
-      if (!rowTicker) rowTicker = setInterval(tickRows, 250);
-    };
-
-    const finishRow = (el) => {
-      if (!el || !isRow(el)) return;
-      el.classList.remove('is-running');
-      el.classList.add('is-done');
-      delete el.dataset.t0;
-      const dur = el.querySelector('[data-dur]');
-      if (dur) dur.textContent = dur.dataset.final || dur.textContent;
-    };
-
-    const finishStepBlocks = (scope) => {
-      scope.querySelectorAll('[data-ai-steps]').forEach((block) => {
-        block.querySelectorAll('.row').forEach((r) => finishRow(r));
-        block.querySelectorAll('.row').forEach((r) => {
-          r.classList.remove('is-running');
-          r.classList.add('is-done');
-        });
-        block.classList.add('is-finished');
-        const chip = block.querySelector('[data-chip]');
-        if (chip) chip.hidden = false;
-      });
-    };
-
-    const resetStepBlocks = () => {
-      root.querySelectorAll('[data-ai-steps]').forEach((block) => {
-        block.classList.remove('is-finished', 'is-open');
-        block.querySelectorAll('.row').forEach((r) => r.classList.remove('is-running', 'is-done'));
-        const chip = block.querySelector('[data-chip]');
-        if (chip) {
-          chip.hidden = true;
-          chip.setAttribute('aria-expanded', 'false');
-        }
-      });
-    };
-
-    const done = () => i >= beats.length;
-
-    const paint = () => {
-      countEl.textContent = `${i} of ${beats.length}`;
-      const running = timer !== null;
-      statusEl.textContent = done() ? 'Complete' : running ? 'Playing' : 'Paused';
-      playLabel.textContent = done() ? 'Replay' : running ? 'Pause' : 'Play';
-      playIcon.textContent = running ? PAUSE_ICON : PLAY_ICON;
-      playBtn.setAttribute('aria-pressed', String(running));
-    };
-
-    const reveal = (el) => {
-      el.classList.add('is-shown');
-      if (isRow(el)) {
-        el.classList.add('is-running');
-        startRow(el);
-      }
-      // The answer only appears once the working box has collapsed to its chip.
-      if (el.hasAttribute('data-ai-answer')) {
-        const block = el.closest('.bubble') || root;
-        finishStepBlocks(block);
-      }
-    };
-
-    const step = () => {
-      clear();
-      if (done()) {
-        setTyping(null);
-        paint();
-        return;
-      }
-      const el = beats[i];
-      const wait = Number(el.dataset.wait) || 800;
-      setTyping(el.dataset.typing || null);
-      timer = setTimeout(() => {
-        setTyping(null);
-        finishRow(beats[i - 1]);
-        reveal(el);
-        i += 1;
-        step();
-      }, wait);
-      paint();
-    };
-
-    const play = () => {
-      if (done() || timer) return;
-      step();
-    };
-
-    const halt = () => {
-      clear();
-      setTyping(null);
-      paint();
-    };
-
-    const showAll = () => {
-      clear();
-      beats.forEach((el) => el.classList.add('is-shown'));
-      finishStepBlocks(root);
-      i = beats.length;
-      setTyping(null);
-      paint();
-    };
-
-    const restart = () => {
-      clear();
-      beats.forEach((el) => el.classList.remove('is-shown', 'is-running', 'is-done'));
-      resetStepBlocks();
-      i = 0;
-      userPaused = false;
-      if (reduce.matches) showAll();
-      else step();
-    };
-
-    playBtn.addEventListener('click', () => {
-      if (done()) return restart();
-      if (timer) {
-        userPaused = true;
-        halt();
-      } else {
-        userPaused = false;
-        play();
-      }
-    });
-
-    restartBtn.addEventListener('click', restart);
-
-    // Thread toggles. The panel is open by default and the button is CSS-hidden
-    // without scripting, so this only ever enhances a working state.
-    root.querySelectorAll('[data-thread]').forEach((btn) => {
-      const panel = btn.parentElement?.querySelector('.thread-panel');
-      if (!panel) return;
-      btn.addEventListener('click', () => {
-        const open = panel.classList.toggle('is-open');
-        btn.setAttribute('aria-expanded', String(open));
-      });
-    });
-
-    // The finished chip reopens the step list, as it does in the app.
-    root.querySelectorAll('[data-chip]').forEach((chip) => {
-      chip.addEventListener('click', () => {
-        const block = chip.closest('[data-ai-steps]');
-        const open = block.classList.toggle('is-open');
-        chip.setAttribute('aria-expanded', String(open));
-      });
-    });
-
-    if (reduce.matches) {
-      showAll();
-      return;
-    }
-
-    // Never an empty panel: the opening message is present before any timer.
-    reveal(beats[0]);
-    i = 1;
-    paint();
-
-    if ('IntersectionObserver' in window) {
-      const io = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((e) => {
-            if (e.isIntersecting && !userPaused) play();
-            else if (!e.isIntersecting) halt();
-          });
-        },
-        { threshold: 0 }
-      );
-      io.observe(root);
-    } else {
-      showAll();
-    }
-  });
-</script>
 
 <style>
   .demo {

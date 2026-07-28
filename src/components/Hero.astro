@@ -1,15 +1,10 @@
 ---
 import Logo from './Logo.astro';
 import Avatar from './Avatar.astro';
-import AiSteps from './AiSteps.astro';
-import { people, workspace, stream } from '../conversation.js';
+import { people, workspace, bidiLine } from '../conversation.js';
 import { primaryPlatform, downloadUrl, desktopVersion } from '../site.js';
 
 const dl = primaryPlatform ? downloadUrl(primaryPlatform) : '#download';
-
-// The first two steps of the same tool run the demo below plays out in full, so the
-// hero and the conversation are showing one assistant, not two different ones.
-const heroSteps = (stream.find((b) => b.kind === 'assistant')?.steps ?? []).slice(0, 2);
 ---
 
 <section class="hero">
@@ -109,14 +104,17 @@ const heroSteps = (stream.find((b) => b.kind === 'assistant')?.steps ?? []).slic
                   </div>
                 </div>
 
-                <!-- The assistant, mid-tool-call. This is the product's real working
-                     indicator, frozen at a moment — see AiSteps.astro. -->
-                <div class="m m-ai">
-                  <Avatar person={people.assistant} size="sm" />
+                <!-- The hero shows the messenger and only the messenger. The assistant
+                     is a separate surface with its own section, and mixing the two here
+                     framed it as "a bot in a channel", which is not what it is. -->
+                <div class="m">
+                  <Avatar person={people.layla} size="sm" />
                   <div class="m-col">
-                    <p class="m-who m-who-ai">Assistant</p>
-                    <div class="m-bubble m-bubble-ai">
-                      <AiSteps steps={heroSteps} id="hero" mode="static" />
+                    <p class="m-who" style={`--hue:${people.layla.hue}`}>
+                      {people.layla.first}
+                    </p>
+                    <div class="m-bubble m-rtl" dir="rtl" lang={bidiLine.lang}>
+                      {bidiLine.text}
                     </div>
                   </div>
                 </div>
@@ -369,10 +367,6 @@ const heroSteps = (stream.find((b) => b.kind === 'assistant')?.steps ?? []).slic
     align-items: flex-end;
   }
 
-  .m-ai .m-col {
-    max-width: 100%;
-    flex: 1;
-  }
 
   .m-who {
     font-size: 0.68rem;
@@ -381,8 +375,9 @@ const heroSteps = (stream.find((b) => b.kind === 'assistant')?.steps ?? []).slic
     color: hsl(var(--hue) 60% 62%);
   }
 
-  .m-who-ai {
-    color: var(--violet);
+  .m-rtl {
+    text-align: right;
+    line-height: 1.8;
   }
 
   .m-bubble {

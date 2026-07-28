@@ -14,6 +14,51 @@ no local paths, internal hostnames or deployment topology. Tier A — credential
 
 ---
 
+## 2026-07-28 — Chat and the assistant are two features, drawn the way the product draws them
+
+Two related changes, both driven by the site misrepresenting the product.
+
+**The demo was not shaped like the messenger.** Hero and transcript were a flat Slack-style
+list — avatar, name, text. The product is a bubble messenger: `MessageArea.jsx` puts your
+own messages right-aligned in the primary fill with delivery ticks under them and everyone
+else's left-aligned in the muted fill, `rounded-2xl` with the corner nearest the speaker
+tightened. Both now follow it, avatars derive their gradient the way `senderStyle.js` does
+(one hue, two lightnesses, 135deg), read state is Telegram-style double ticks rather than
+the invented "Seen by all 9 members" line, and the typing hint is the constant-height
+italic row above the composer.
+
+**The assistant was framed as a bot in a channel.** It was one beat inside the transcript,
+which is not what it is: in the product it is a distinct chat type (`ai_assistant`) with
+its own header, its own mode switch — advisory "consultation and strategic guidance" versus
+builder "actively creates sites, lists and pages" — and its own agent picker. It now has
+its own section and its own surface, and the transcript contains no assistant at all. That
+they co-exist — the same assistant can be switched on inside any conversation — is stated
+at the end of that section rather than used as the framing.
+
+The centrepiece is `AiSteps.astro`, a reproduction of the app's `AISteps` component: the
+bordered "Working…" box, each row spinning with a counting timer and swapping to a check
+and its real duration, then collapsing to a "Worked · 4 steps · 5.3s" chip that reopens on
+click. Rows are driven off the real durations, so a step takes as long on screen as its
+label claims. `AiIcons.astro` carries the same lucide glyphs the app maps each slug to.
+
+**Only real tool slugs may appear.** `search_hub`, `search_messages`, `web_search`,
+`fetch_page`, `read_list`, `my_items`, `read_attachment`, `remember`, and the pipeline
+steps. An invented slug would claim a capability that does not exist (MANIFEST §1.5) and
+would render as the fallback wrench.
+
+The step engine moved to `DemoEngine.astro`, rendered once from the layout and bound to
+every `[data-demo]` block, because two demos running the same logic from two copies would
+drift.
+
+Rejected: keeping the assistant in the transcript and merely writing more about it —
+the placement was the claim, and no amount of copy fixes a wrong frame. Rejected: leading
+the hero with the assistant — it re-mixed the two concepts in the most prominent place on
+the page. Rejected: the robot emoji the app uses for the assistant avatar, for the reason
+already recorded about emoji rendering as tofu; it is drawn as SVG on the same purple→pink
+brand gradient.
+
+---
+
 ## 2026-07-27 — Published 0.3.4; the version is now derived from one source, not restated
 
 Routine binary swap to **0.3.4**, `f0501e69…`, 4,198,400 bytes — still "4 MB" under the

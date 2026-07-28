@@ -82,8 +82,12 @@ contact form, because none of those exist yet.
     bidi.js            majority-script direction, mirroring the app's own algorithm
     layouts/BaseLayout.astro   SEO contract, JSON-LD, reveal observer
     components/
-      Header.astro Hero.astro ChatDemo.astro Payoff.astro Calls.astro
-      Script.astro Features.astro SelfHosted.astro Download.astro Footer.astro
+      Header.astro Hero.astro ChatDemo.astro Payoff.astro Assistant.astro
+      Calls.astro Script.astro Features.astro SelfHosted.astro Download.astro
+      Footer.astro BackToTop.astro
+      AiSteps.astro    the app's working indicator, reproduced
+      AiIcons.astro    tool-slug icon sprite (the app's lucide glyphs)
+      DemoEngine.astro the step engine both demos share, rendered from the layout
       Avatar.astro Logo.astro PlatformIcon.astro Rich.astro
     pages/index.astro  404.astro
     styles/global.css  tokens, base, layout helpers, shared app chrome
@@ -130,6 +134,20 @@ performs the bug and the fix. `src/bidi.js` is the same majority-script algorith
 uses in `frontend/src/components/messenger/MessageArea.jsx`, kept identical on purpose.
 It demonstrates message direction only — **no localisation is claimed**, because there is
 none. The traps that silently break this section are listed in `_docs/HANDOFF.md`.
+
+**Chat and the assistant are presented as two features.** That is what they are in the
+product — the assistant is its own chat type with its own header, mode switch and agent
+picker, not a bot in a channel — so the transcript contains no assistant and the assistant
+has its own section and its own surface. That the same assistant can be switched on inside
+any conversation is a closing note there, not the framing.
+
+**The demos are drawn the way the product draws them.** Bubbles rather than a flat list:
+your own messages right-aligned in the primary fill with delivery ticks, everyone else's
+left-aligned in the muted fill under a name in their identity colour, avatars built from
+the same hue-to-gradient rule the app uses. The assistant's working indicator reproduces
+the app's own component — a "Working…" box whose rows spin with a counting timer and swap
+to a check and a real duration, collapsing to a "Worked · N steps" chip that reopens on
+click. Both demos are driven by one shared engine, `DemoEngine.astro`.
 
 **Mock UI is labelled.** Every simulated app surface carries a small `Demo` tag (§1.6), and
 the purely decorative mocks (hero window, call window) are `aria-hidden` with their meaning

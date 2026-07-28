@@ -1,0 +1,436 @@
+---
+import Avatar from './Avatar.astro';
+import Rich from './Rich.astro';
+import AiSteps from './AiSteps.astro';
+import { people, assistantSession as s } from '../conversation.js';
+
+/**
+ * The assistant as its own feature, not a bot in a channel.
+ *
+ * In the product it is a distinct chat type (`ai_assistant`) with its own header, its
+ * own mode switch — advisory "consultation and strategic guidance" versus builder
+ * "actively creates sites, lists, and pages" — and its own agent picker. The window
+ * below is that surface, so the header chrome here is the assistant's, not a channel's.
+ *
+ * It co-exists with chat rather than living inside it: the same assistant can be
+ * switched on in any conversation. That is stated at the end, deliberately, so the
+ * feature is introduced on its own terms first.
+ *
+ * The demo shares the page's step engine — `[data-demo]` + `[data-beat]` — see
+ * DemoEngine.astro.
+ */
+---
+
+<section class="section" id="assistant">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">AI assistant</span>
+      <h2>It does the work first, then answers</h2>
+      <p>
+        Ask it something and it does not guess from a training set. It searches your
+        messages, opens your documents, reads the file you attached — and shows you every
+        step it took, how long each one ran, and what it looked at. The answer arrives with
+        its working attached.
+      </p>
+    </div>
+
+    <div class="split">
+      <div class="split-media reveal">
+        <div class="demo" data-demo>
+          <div class="window">
+            <div class="window-bar">
+              <span class="window-dots"><i></i><i></i><i></i></span>
+              <span class="window-title">Assistant</span>
+              <span class="tag-demo">Demo</span>
+            </div>
+
+            <!-- The assistant chat's own header: which mode it is in, and which agent
+                 answers. Both are real controls in the product. -->
+            <div class="ai-head">
+              <Avatar person={people.assistant} size="sm" />
+              <div class="ai-id">
+                <p class="ai-name">Assistant</p>
+                <p class="ai-sub">Answers from your hub</p>
+              </div>
+              <span class="chip-mode">{s.mode}</span>
+              <span class="chip-agent">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ai-ic-remember" /></svg>
+                {s.agent}
+              </span>
+            </div>
+
+            <div class="thread-body">
+              <article class="beat msg is-mine" data-beat data-wait="1200">
+                <div class="col">
+                  <div class="bubble">{s.ask}</div>
+                </div>
+              </article>
+
+              <article class="beat msg is-ai" data-beat data-wait="600">
+                <Avatar person={people.assistant} size="sm" />
+                <div class="col">
+                  <div class="bubble bubble-ai">
+                    <AiSteps steps={s.steps} id="assistant" />
+                    <div data-beat data-wait="600" data-ai-answer>
+                      <p class="body"><Rich text={s.answer} /></p>
+                      <p class="cites">
+                        {s.citations.map((c) => <span class="cite">{c.label}</span>)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <div class="composer" aria-hidden="true"><span>Ask the assistant…</span></div>
+          </div>
+
+          <div class="controls" data-controls>
+            <button class="ctl ctl-primary" type="button" data-play>
+              <span data-play-icon aria-hidden="true"></span>
+              <span data-play-label>Pause</span>
+            </button>
+            <button class="ctl" type="button" data-restart>Restart</button>
+            <p class="status">
+              <span data-status>Playing</span>
+              <span class="status-sep" aria-hidden="true">·</span>
+              <span data-count>0 of 0</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="split-copy reveal">
+        <h3>Why the steps matter</h3>
+        <p>
+          An assistant that answers instantly is either recalling something generic or
+          making it up. One that takes four seconds and tells you it read
+          <code>nginx.conf</code> is one you can check — and checking is the difference
+          between a useful colleague and a confident stranger.
+        </p>
+        <ul class="split-list">
+          <li>
+            <b>Its own tools, on your data.</b> Searching messages and hub content, reading
+            an attached file, fetching a page through your own metasearch — each one an
+            admin-managed entry in a registry, not a black box
+          </li>
+          <li>
+            <b>Pick who answers.</b> Route automatically, or name a specific agent. An
+            endpoint that starts failing drops out of the picker on its own and comes back
+            when it recovers
+          </li>
+          <li>
+            <b>Two modes.</b> Advisory consults and explains. Builder actually creates sites,
+            lists and pages — and nothing is created until a human approves the plan
+          </li>
+          <li>
+            <b>It remembers, and you can see what.</b> Long-term notes are per person,
+            visible, and deletable by the person they are about
+          </li>
+          <li>
+            <b>It reads what you send it.</b> PDF, Word and text for any model; images for
+            the models that can see
+          </li>
+        </ul>
+
+        <div class="callout">
+          <h4>Separate from chat, available inside it</h4>
+          <p>
+            The assistant is its own conversation, with its own history — but the same
+            assistant can be switched on inside any channel or direct message, where it
+            answers with that conversation as its context. Two features, one hub, and your
+            own model endpoints behind both.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .split {
+    gap: 52px;
+    align-items: start;
+  }
+
+  .demo {
+    min-width: 0;
+  }
+
+  /* ── assistant chat header ── */
+  .ai-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-wrap: wrap;
+  }
+
+  .ai-id {
+    min-width: 0;
+    margin-right: auto;
+  }
+
+  .ai-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+  }
+
+  .ai-sub {
+    font-size: 0.75rem;
+    color: var(--text-3);
+  }
+
+  .chip-mode,
+  .chip-agent {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    flex: none;
+  }
+
+  .chip-mode {
+    background: color-mix(in srgb, var(--violet) 16%, transparent);
+    color: var(--violet);
+    border: 1px solid color-mix(in srgb, var(--violet) 40%, transparent);
+  }
+
+  .chip-agent {
+    background: var(--surface-2);
+    color: var(--text-2);
+    border: 1px solid var(--border-strong);
+  }
+
+  .chip-agent svg {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+
+  /* ── the exchange ── */
+  .thread-body {
+    padding: 18px 16px 4px;
+    display: grid;
+    gap: 14px;
+    background: var(--bg-raised);
+  }
+
+  :global(.js) [data-beat] {
+    opacity: 0.06;
+    transform: translateY(9px);
+    transition: opacity 0.34s ease, transform 0.34s ease;
+  }
+
+  :global(.js) [data-beat].is-shown {
+    opacity: 1;
+    transform: none;
+  }
+
+  .msg {
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+  }
+
+  .msg.is-mine {
+    flex-direction: row-reverse;
+  }
+
+  .col {
+    min-width: 0;
+    max-width: 88%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .msg.is-mine .col {
+    align-items: flex-end;
+  }
+
+  .msg.is-ai .col {
+    flex: 1;
+  }
+
+  .bubble {
+    padding: 9px 14px;
+    border-radius: 16px;
+    border-bottom-left-radius: 6px;
+    background: var(--surface-2);
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  .msg.is-mine .bubble {
+    background: var(--accent);
+    color: #fff;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 6px;
+  }
+
+  .bubble-ai {
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .body {
+    font-size: 0.92rem;
+    line-height: 1.62;
+    color: var(--text-2);
+  }
+
+  .cites {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  .cite {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 7px;
+    border: 1px solid var(--border-strong);
+    color: var(--text-3);
+    background: var(--surface-2);
+  }
+
+  .cite::before {
+    content: "↳ ";
+    color: var(--accent-2);
+  }
+
+  .composer {
+    margin: 10px 16px 16px;
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    font-size: 0.83rem;
+    color: var(--text-3);
+  }
+
+  /* ── controls ── */
+  .controls {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  :global(.js) .controls {
+    display: flex;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.js) .controls {
+      display: none;
+    }
+  }
+
+  .ctl {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    border-radius: 9px;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: background 0.15s ease;
+  }
+
+  .ctl:hover {
+    background: var(--surface-2);
+  }
+
+  .ctl-primary {
+    border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+    background: var(--accent-soft);
+    color: var(--accent-2);
+  }
+
+  .ctl [data-play-icon] {
+    font-size: 0.7rem;
+    line-height: 1;
+  }
+
+  .status {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: var(--text-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .status-sep {
+    margin-inline: 6px;
+  }
+
+  /* ── copy column ── */
+  .split-copy h3 {
+    font-size: clamp(1.3rem, 2.5vw, 1.75rem);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
+
+  .split-list b {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .callout {
+    margin-top: 26px;
+    padding: 18px 20px;
+    border-radius: var(--radius-sm);
+    border: 1px solid color-mix(in srgb, var(--violet) 34%, transparent);
+    background: color-mix(in srgb, var(--violet) 8%, var(--surface));
+  }
+
+  .callout h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  .callout p {
+    margin-top: 8px;
+    font-size: 0.92rem;
+    color: var(--text-2);
+    line-height: 1.62;
+  }
+
+  @media (max-width: 980px) {
+    .split {
+      gap: 36px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .thread-body {
+      padding: 14px 12px 2px;
+    }
+
+    .col {
+      max-width: 94%;
+    }
+
+    .status {
+      width: 100%;
+      margin-left: 0;
+      order: -1;
+    }
+
+    .controls {
+      flex-wrap: wrap;
+    }
+  }
+</style>

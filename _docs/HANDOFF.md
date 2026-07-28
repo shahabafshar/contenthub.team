@@ -56,14 +56,24 @@ absolute URLs in meta/JSON-LD are correct for when it is.
 The site is complete, verified and pushed. It has never been deployed, because Cloudflare
 is not connected yet (see *Blocked on the user*).
 
-One page plus a 404, in this order: hero → the conversation demo → the release note it
-produced → calls → mixed scripts → features → self-hosting → download.
+One page plus a 404, in this order: hero → the chat demo → the release note it produced →
+**the AI assistant** → calls → mixed scripts → features → self-hosting → download.
+
+**Chat and the assistant are deliberately separate features**, because that is what they
+are in the product: the assistant is its own chat type with its own header, mode switch and
+agent picker, not a bot living in a channel. The transcript contains no assistant; the
+assistant section has its own surface and its own demo. Their co-existence — the same
+assistant can be switched on inside any conversation — is a closing note in that section,
+not the framing. Do not fold one back into the other.
 
 - **The conversation demo works and is asserted, not assumed.** Pause holds, Play resumes,
   Restart clears and replays, it pauses off-screen, and the thread toggle flips
   `aria-expanded`. It reveals the first message immediately so the panel is never an empty
   box, and unrevealed beats sit at `opacity: 0.06` so it reads as a populated conversation
   rather than a blank rectangle before it plays.
+- **Both demos are drawn as the product draws them** — bubbles, delivery ticks, identity
+  colours from the same hue-to-gradient rule the app uses, and the assistant's real
+  working indicator with its counting timers and collapsing "Worked · N steps" chip.
 - **The mixed-script section is a live demonstration.** Both panels render the identical
   string and differ only in `dir`, so the viewer's own browser performs the bug and the fix.
 - **The download works the moment the site deploys** — the binary ships in this repo.
@@ -83,6 +93,10 @@ light and at 390px.
 | What | Where |
 |---|---|
 | The worked example — people, messages, thread, release note | `src/conversation.js` |
+| The assistant's exchange, steps and durations | `assistantSession` in `src/conversation.js` |
+| The assistant's working indicator (reproduces the app's `AISteps`) | `src/components/AiSteps.astro` |
+| Tool-slug icon sprite (the app's lucide glyphs) | `src/components/AiIcons.astro` |
+| The step engine both demos share | `src/components/DemoEngine.astro` |
 | Outbound links, download targets, per-platform availability | `src/site.js` |
 | Majority-script direction (mirrors the app's algorithm) | `src/bidi.js` |
 | Design tokens, both colour schemes | `src/styles/global.css` |
@@ -165,6 +179,21 @@ Every one of these cost time or shipped a defect during the initial build.
 17. **`file://` will not render the build**; serve it with `npm run preview`. Full-page
     screenshots do not fire `IntersectionObserver`, so scroll the page in the harness before
     capturing or reveal-on-scroll sections shoot blank.
+18. **Only real AI tool slugs may appear in `assistantSession.steps`** — `search_hub`,
+    `search_messages`, `web_search`, `fetch_page`, `read_list`, `my_items`,
+    `read_attachment`, `remember`, plus the pipeline steps `analyze`, `summarize`, `think`,
+    `review`, `handoff`. An invented slug claims a capability that does not exist, and
+    renders as the fallback wrench because `AiIcons.astro` only defines the real ones.
+19. **The step engine is shared and lives in `DemoEngine.astro`**, rendered once from the
+    layout and bound to every `[data-demo]`. Do not copy it into a component — a second
+    copy will drift. A new demo opts in by providing `[data-beat]` elements in document
+    order plus the control elements the engine reads.
+20. **Two demos means two of every control.** Playwright's strict mode rejects a bare
+    `[data-play]` / `[data-controls]` locator now; scope harness selectors to
+    `#conversation` or `#assistant`, or you will test the wrong one.
+21. **A class-level `display` beats the UA's `[hidden]` rule.** The assistant's collapsed
+    chip leaked into the live state until `.chip[hidden] { display: none }` was added.
+    Anything toggled by the `hidden` attribute needs the same guard.
 
 ---
 

@@ -119,35 +119,6 @@ export const stream = [
     },
   },
   {
-    kind: 'assistant',
-    from: 'marta',
-    time: '09:24',
-    ask: '@assistant where else is an upload limit configured?',
-    /**
-     * The assistant's working steps, in the shape the app's own `AISteps` component
-     * renders: a tool slug, the human label the tool registry gives it, a short preview
-     * of the arguments, and how long the step took.
-     *
-     * **Only real tool slugs belong here** — `search_hub`, `search_messages`,
-     * `web_search`, `fetch_page`, `read_list`, `my_items`, `read_attachment`, `remember`,
-     * plus the pipeline steps `analyze`, `summarize`, `think`, `review`, `handoff`.
-     * Inventing one would put a capability on the page that does not exist (MANIFEST §1.5)
-     * and would render with the fallback wrench icon.
-     */
-    steps: [
-      { tool: 'search_messages', label: 'Search messages', preview: 'client_max_body_size', ms: 900 },
-      { tool: 'search_hub', label: 'Search the hub', preview: 'upload limit', ms: 1400 },
-      { tool: 'read_attachment', label: 'Read an attached file', preview: 'nginx.conf', ms: 700 },
-      { tool: 'think', label: 'Waiting for the model to answer', preview: '', ms: 2300 },
-    ],
-    answer:
-      'Three places set an upload ceiling. `deploy/nginx.conf` caps the request body — `32m` in the staging block, `512m` in production, which is the difference you hit. `DATA_UPLOAD_MAX_MEMORY_SIZE` in `backend/settings.py` only decides when Django spools to a temp file, so it will not reject a large upload. The SDK also refuses anything over 500 MB client-side before it starts. Only the nginx value differs between environments.',
-    citations: [
-      { label: 'deploy/nginx.conf', kind: 'document' },
-      { label: '#infra · 4 Feb', kind: 'message' },
-    ],
-  },
-  {
     kind: 'call',
     from: 'daniel',
     time: '09:29',
@@ -164,6 +135,42 @@ export const stream = [
     receipt: { seen: 9 },
   },
 ];
+
+/**
+ * The assistant is a **separate surface**, not a bot living in a channel, and the page
+ * presents it that way. In the product it is its own chat type (`ai_assistant`) with its
+ * own header, its own mode switch and its own agent picker — and it can additionally be
+ * switched on inside a normal chat, which is the co-existence the site's copy notes
+ * rather than leads with.
+ *
+ * `steps` is the shape the app's `AISteps` component renders: a tool slug, the human
+ * label the tool registry gives it, a short preview of the arguments, and how long the
+ * step took.
+ *
+ * **Only real tool slugs belong here** — `search_hub`, `search_messages`, `web_search`,
+ * `fetch_page`, `read_list`, `my_items`, `read_attachment`, `remember`, plus the pipeline
+ * steps `analyze`, `summarize`, `think`, `review`, `handoff`. Inventing one would put a
+ * capability on the page that does not exist (MANIFEST §1.5) and would render with the
+ * fallback wrench icon.
+ */
+export const assistantSession = {
+  // Mirrors the header of a real assistant chat: the mode, and which agent answers.
+  mode: 'Advisory',
+  agent: 'Auto',
+  ask: 'Where else is an upload limit configured? Staging just truncated a 47 MB file.',
+  steps: [
+    { tool: 'search_messages', label: 'Search messages', preview: 'client_max_body_size', ms: 900 },
+    { tool: 'search_hub', label: 'Search the hub', preview: 'upload limit', ms: 1400 },
+    { tool: 'read_attachment', label: 'Read an attached file', preview: 'nginx.conf', ms: 700 },
+    { tool: 'think', label: 'Waiting for the model to answer', preview: '', ms: 2300 },
+  ],
+  answer:
+    'Three places set an upload ceiling. `deploy/nginx.conf` caps the request body — `32m` in the staging block, `512m` in production, which is the difference you hit. `DATA_UPLOAD_MAX_MEMORY_SIZE` in `backend/settings.py` only decides when Django spools to a temp file, so it will not reject a large upload. The SDK also refuses anything over 500 MB client-side before it starts. Only the nginx value differs between environments.',
+  citations: [
+    { label: 'deploy/nginx.conf', kind: 'document' },
+    { label: '#infra · 4 Feb', kind: 'message' },
+  ],
+};
 
 /**
  * The payoff (MANIFEST §6.5) — the artefact the conversation produced, shown the way a
