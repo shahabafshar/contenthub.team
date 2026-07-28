@@ -86,9 +86,10 @@ not the framing. Do not fold one back into the other.
 - **Deliberately unfinished:** macOS, Linux, Android and iOS are rendered as genuinely
   `disabled` buttons showing real status. That is not a placeholder; it is the honest state.
 
-Published Windows build: **0.3.5**, 4,200,960 bytes, md5 `009f4f23…`. Always taken from the
-application repo's **per-version folder**, never the dist-root mirror — see `OPERATIONS.md`
-step 2 for why.
+Published Windows build: **0.3.6**, 4,096,512 bytes (**3.9 MB**), md5 `19407c85…`. Always
+taken from the application repo's **per-version folder**, never the dist-root mirror — see
+`OPERATIONS.md` step 2 for why. The stated size is not a constant: 0.3.6 shrank to 3.9 MB
+from 0.3.5's 4 MB, and all four quoted sizes had to change with it.
 
 Last verification (2026-07-27, against a served build): `_tools/verify.mjs` **50 passed,
 0 failed**; project-specific harness **51 passed, 0 failed**. Screenshots reviewed in dark,

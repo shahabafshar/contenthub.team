@@ -94,7 +94,7 @@ contact form, because none of those exist yet.
   public/
     og.jpg  robots.txt  assets/
     _headers                            caps /download/* caching so updates are noticed
-    download/ContentHub-Native.exe      the 4 MB Windows build, served by this site
+    download/ContentHub-Native.exe      the ~4 MB Windows build, served by this site
     download/ContentHub-Native.exe.md5  generated on prebuild — never edit by hand
   scripts/
     write-download-hash.mjs             writes the MD5 sidecars; wired to npm prebuild
@@ -221,6 +221,11 @@ Two mechanisms keep that honest and **must stay wired up**:
 **To ship a new build:** copy the new `ContentHub-Native.exe` over the existing one, bump
 `desktopVersion` in `src/site.js` for the version shown on the page, and build. The sidecar
 updates itself. Each new binary adds ~4 MB to git history.
+
+The exact size is quoted on the page in four places, all in `src/site.js` and
+`src/components/Download.astro`, and it does change between builds — 0.3.6 came in at
+3.9 MB where 0.3.5 was 4 MB. `_docs/OPERATIONS.md` step 4 lists them and gives the rounding
+rule; re-derive all four, or the page states a size the file does not have.
 
 `src/site.js` supports two hosting routes, and `downloadUrl()` picks per platform:
 
