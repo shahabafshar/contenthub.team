@@ -115,13 +115,15 @@
 
     const done = () => i >= beats.length;
 
+    // Controls are optional: the hero plays a scenario with no chrome around it,
+    // so every control reference here is null-guarded rather than assumed.
     const paint = () => {
-      countEl.textContent = `${i} of ${beats.length}`;
       const running = timer !== null;
-      statusEl.textContent = done() ? 'Complete' : running ? 'Playing' : 'Paused';
-      playLabel.textContent = done() ? 'Replay' : running ? 'Pause' : 'Play';
-      playIcon.textContent = running ? PAUSE_ICON : PLAY_ICON;
-      playBtn.setAttribute('aria-pressed', String(running));
+      if (countEl) countEl.textContent = `${i} of ${beats.length}`;
+      if (statusEl) statusEl.textContent = done() ? 'Complete' : running ? 'Playing' : 'Paused';
+      if (playLabel) playLabel.textContent = done() ? 'Replay' : running ? 'Pause' : 'Play';
+      if (playIcon) playIcon.textContent = running ? PAUSE_ICON : PLAY_ICON;
+      if (playBtn) playBtn.setAttribute('aria-pressed', String(running));
     };
 
     const reveal = (el) => {
@@ -187,7 +189,7 @@
       else step();
     };
 
-    playBtn.addEventListener('click', () => {
+    playBtn?.addEventListener('click', () => {
       if (done()) return restart();
       if (timer) {
         userPaused = true;
@@ -198,7 +200,7 @@
       }
     });
 
-    restartBtn.addEventListener('click', restart);
+    restartBtn?.addEventListener('click', restart);
 
     // Thread toggles. The panel is open by default and the button is CSS-hidden
     // without scripting, so this only ever enhances a working state.

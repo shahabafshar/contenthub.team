@@ -59,8 +59,14 @@ is not connected yet (see *Blocked on the user*).
 One page plus a 404, in this order: hero → the chat demo → the release note it produced →
 **the AI assistant** → calls → mixed scripts → features → self-hosting → download.
 
-**Chat and the assistant are deliberately separate features**, because that is what they
-are in the product: the assistant is its own chat type with its own header, mode switch and
+**The hero plays a scenario**: a rejected upload is reported, the next person asks the
+assistant, and it works through its tools and answers — chat handing off to the assistant
+in about seven seconds. Its pacing is measured, not decorative; see `DECISIONS.md` before
+changing `heroScenario`. It is the one demo with no controls, which is why every control
+reference in `DemoEngine.astro` is null-guarded.
+
+**Chat and the assistant are deliberately separate features** in the sections below,
+because that is what they are in the product: the assistant is its own chat type with its own header, mode switch and
 agent picker, not a bot living in a channel. The transcript contains no assistant; the
 assistant section has its own surface and its own demo. Their co-existence — the same
 assistant can be switched on inside any conversation — is a closing note in that section,
@@ -93,6 +99,7 @@ light and at 390px.
 | What | Where |
 |---|---|
 | The worked example — people, messages, thread, release note | `src/conversation.js` |
+| The hero scenario and its pacing | `heroScenario` in `src/conversation.js` |
 | The assistant's exchange, steps and durations | `assistantSession` in `src/conversation.js` |
 | The assistant's working indicator (reproduces the app's `AISteps`) | `src/components/AiSteps.astro` |
 | Tool-slug icon sprite (the app's lucide glyphs) | `src/components/AiIcons.astro` |

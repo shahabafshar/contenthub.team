@@ -14,6 +14,40 @@ no local paths, internal hostnames or deployment topology. Tier A — credential
 
 ---
 
+## 2026-07-28 — The hero plays a scenario where chat hands off to the assistant
+
+**This supersedes part of the entry below**, which removed the assistant from the hero on
+the grounds that showing it there re-mixed two concepts. That reasoning held for a *static*
+hero, where the assistant appearing among the bubbles read as "a bot in this channel". It
+does not hold for a *scenario*, where the handoff is the thing being shown.
+
+The hero now plays: someone reports a rejected upload, the next person asks the assistant
+where the limit is set, and the assistant works through its tools and answers. Both halves
+of the product, co-operating, in about seven seconds and without reading any copy. The
+sections below still teach each half as a feature in its own right, so the separation the
+entry below established is intact — the hero demonstrates the system, the sections define
+the features.
+
+**Pacing is the design.** The two human beats are 450ms and 900ms, which puts the assistant
+to work about 1.7 seconds in. That number was measured, not guessed: an earlier draft at
+700/1100 took long enough that the hero read as a chat demo which happens to end with a
+bot. The assistant's own steps keep their real durations, because watching it work is the
+part worth the time. If you edit `heroScenario`, re-measure — the ratio between the human
+setup and the assistant's work is what makes it legible.
+
+Two consequences. The step engine had to become tolerant of a demo with no controls, since
+play/restart buttons in a hero would be clutter — every control reference in
+`DemoEngine.astro` is now null-guarded. And the hero's desktop notification card was
+dropped: with a taller window it collided with the composer, and the version pill plus the
+download section already carry the "this is a desktop app" signal.
+
+Rejected: looping the scenario — a hero that restarts every few seconds competes with the
+copy beside it, so it plays once and rests on the answer. Rejected: keeping the assistant
+out of the hero and describing the handoff in words — the handoff is a behaviour, and the
+whole page's method is to show behaviour rather than assert it.
+
+---
+
 ## 2026-07-28 — Chat and the assistant are two features, drawn the way the product draws them
 
 Two related changes, both driven by the site misrepresenting the product.

@@ -1,7 +1,9 @@
 ---
 import Logo from './Logo.astro';
 import Avatar from './Avatar.astro';
-import { people, workspace, bidiLine } from '../conversation.js';
+import AiSteps from './AiSteps.astro';
+import Rich from './Rich.astro';
+import { people, workspace, heroScenario, assistantSession } from '../conversation.js';
 import { primaryPlatform, downloadUrl, desktopVersion } from '../site.js';
 
 const dl = primaryPlatform ? downloadUrl(primaryPlatform) : '#download';
@@ -41,9 +43,10 @@ const dl = primaryPlatform ? downloadUrl(primaryPlatform) : '#download';
         </p>
       </div>
 
-      <!-- Decorative mock of the desktop client (MANIFEST §8.3): the meaning is
-           carried by the copy above and the sections below. -->
-      <div class="art" aria-hidden="true">
+      <!-- Decorative mock (MANIFEST §8.3): the meaning is carried by the copy above
+           and the sections below, so the scenario is aria-hidden rather than read
+           aloud as a fake conversation. -->
+      <div class="art" aria-hidden="true" data-demo>
         <div class="window app">
           <div class="window-bar">
             <span class="window-dots"><i></i><i></i><i></i></span>
@@ -74,47 +77,57 @@ const dl = primaryPlatform ? downloadUrl(primaryPlatform) : '#download';
                 <span class="pane-meta">{workspace.members} members</span>
               </div>
 
-              <!-- Same bubble language as the conversation demo below: your own
-                   messages right in the primary fill with ticks, everyone else's
-                   left in the muted fill under a name in their identity colour. -->
+              <!-- The scenario. Two fast human beats, then the assistant does the
+                   work — the whole point being that a visitor sees chat AND the
+                   assistant co-operating inside about eight seconds, without
+                   reading a word of the copy. Driven by the page's shared engine
+                   (DemoEngine.astro); the sections below then teach each half of
+                   it as a feature in its own right. -->
               <div class="pane-msgs">
-                <div class="m is-mine">
-                  <div class="m-col">
-                    <div class="m-bubble">
-                      Uploads over about 40 MB fail at 100% — the document never appears.
-                    </div>
-                    <p class="m-meta">
-                      09:12
-                      <svg class="m-ticks" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M18 6 7 17l-4-4" />
-                        <path d="m22 8-9 9" />
-                      </svg>
-                    </p>
-                  </div>
-                </div>
+                {
+                  heroScenario.beats.map((b) => {
+                    const who = people[b.from];
+                    return (
+                      <div class={`m${b.mine ? ' is-mine' : ''}`} data-beat data-wait={b.wait}>
+                        {!b.mine && <Avatar person={who} size="sm" />}
+                        <div class="m-col">
+                          {!b.mine && (
+                            <p class="m-who" style={`--hue:${who.hue}`}>{who.first}</p>
+                          )}
+                          <div class="m-bubble">
+                            {b.ask ? (
+                              <>
+                                <span class="m-mention">@assistant</span>
+                                {b.body.replace('@assistant', '')}
+                              </>
+                            ) : (
+                              b.body
+                            )}
+                          </div>
+                          <p class="m-meta">
+                            {b.time}
+                            {b.mine && (
+                              <svg class="m-ticks" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M18 6 7 17l-4-4" />
+                                <path d="m22 8-9 9" />
+                              </svg>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })
+                }
 
-                <div class="m">
-                  <Avatar person={people.daniel} size="sm" />
+                <div class="m m-ai" data-beat data-wait="350">
+                  <Avatar person={people.assistant} size="sm" />
                   <div class="m-col">
-                    <p class="m-who" style={`--hue:${people.daniel.hue}`}>
-                      {people.daniel.first}
-                    </p>
-                    <div class="m-bubble">Found it — the staging proxy caps the body at 32 MB.</div>
-                    <p class="m-thread">3 replies</p>
-                  </div>
-                </div>
-
-                <!-- The hero shows the messenger and only the messenger. The assistant
-                     is a separate surface with its own section, and mixing the two here
-                     framed it as "a bot in a channel", which is not what it is. -->
-                <div class="m">
-                  <Avatar person={people.layla} size="sm" />
-                  <div class="m-col">
-                    <p class="m-who" style={`--hue:${people.layla.hue}`}>
-                      {people.layla.first}
-                    </p>
-                    <div class="m-bubble m-rtl" dir="rtl" lang={bidiLine.lang}>
-                      {bidiLine.text}
+                    <p class="m-who m-who-ai">Assistant</p>
+                    <div class="m-bubble m-bubble-ai">
+                      <AiSteps steps={assistantSession.steps} id="hero" />
+                      <p class="m-answer" data-beat data-wait="500" data-ai-answer>
+                        <Rich text={heroScenario.answer} />
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -123,21 +136,6 @@ const dl = primaryPlatform ? downloadUrl(primaryPlatform) : '#download';
               <div class="composer"><span>Message # {workspace.channel}</span></div>
             </div>
           </div>
-        </div>
-
-        <!-- A message notification, deliberately: the Windows build on the download
-             page does native OS notifications, but not the Electron client's rich
-             call cards with Answer/Decline, so showing those would promise a
-             capability the downloadable app does not have (MANIFEST §1.5). -->
-        <div class="notif">
-          <div class="notif-top">
-            <Avatar person={people.daniel} />
-            <div class="notif-txt">
-              <p class="notif-title">{people.daniel.name}</p>
-              <p class="notif-sub"># {workspace.channel}</p>
-            </div>
-          </div>
-          <p class="notif-body">Found it — the staging proxy caps the body at 32 MB.</p>
         </div>
       </div>
     </div>
@@ -166,14 +164,17 @@ const dl = primaryPlatform ? downloadUrl(primaryPlatform) : '#download';
 
   .grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.04fr) minmax(0, 1fr);
-    gap: 52px;
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    gap: 48px;
     align-items: center;
   }
 
   h1 {
     margin-top: 18px;
-    font-size: clamp(2.05rem, 4.4vw, 3.1rem);
+    /* Sized against the copy column, which narrowed when the scenario took more
+       width: at 3.1rem "On your own servers." no longer fitted and the heading
+       broke into three lines. */
+    font-size: clamp(2rem, 4.1vw, 2.9rem);
     font-weight: 800;
     letter-spacing: -0.033em;
     line-height: 1.08;
@@ -231,9 +232,11 @@ const dl = primaryPlatform ? downloadUrl(primaryPlatform) : '#download';
     gap: 7px;
   }
 
+  /* The rail is narrow on purpose: the scenario, not the channel list, is what the
+     hero is for, and the assistant's step rows need the width. */
   .app-body {
     display: grid;
-    grid-template-columns: 132px minmax(0, 1fr);
+    grid-template-columns: 104px minmax(0, 1fr);
     min-height: 292px;
   }
 
@@ -280,12 +283,17 @@ const dl = primaryPlatform ? downloadUrl(primaryPlatform) : '#download';
     font-size: 0.73rem;
     color: var(--text-2);
     line-height: 1.3;
+    overflow: hidden;
   }
 
+  /* `min-width: 0` is load-bearing: a flex item will not shrink below its content
+     width without it, so the channel name refused to ellipsise and instead shoved
+     the unread badge out past the rail's divider and into the message pane. */
   .rail li span {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 0;
   }
 
   .rail li.is-active {
@@ -331,9 +339,9 @@ const dl = primaryPlatform ? downloadUrl(primaryPlatform) : '#download';
   }
 
   .pane-msgs {
-    padding: 14px;
+    padding: 14px 14px 14px 16px;
     display: grid;
-    gap: 15px;
+    gap: 13px;
     flex: 1;
     align-content: start;
   }
@@ -375,9 +383,47 @@ const dl = primaryPlatform ? downloadUrl(primaryPlatform) : '#download';
     color: hsl(var(--hue) 60% 62%);
   }
 
-  .m-rtl {
-    text-align: right;
-    line-height: 1.8;
+  .m-who-ai {
+    color: var(--violet);
+  }
+
+  .m-ai .m-col {
+    max-width: 100%;
+    flex: 1;
+  }
+
+  .m-mention {
+    font-weight: 600;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.22);
+    border-radius: 4px;
+    padding: 0 3px;
+    margin-right: 2px;
+  }
+
+  .m-bubble-ai {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 7px 9px;
+  }
+
+  .m-answer {
+    font-size: 0.72rem;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+
+  /* The hero scenario is the one demo with no controls, so it needs the same
+     ghosting the others use or it would flash its whole transcript on load. */
+  :global(.js) .art [data-beat] {
+    opacity: 0.06;
+    transform: translateY(7px);
+    transition: opacity 0.32s ease, transform 0.32s ease;
+  }
+
+  :global(.js) .art [data-beat].is-shown {
+    opacity: 1;
+    transform: none;
   }
 
   .m-bubble {

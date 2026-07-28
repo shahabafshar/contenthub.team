@@ -173,6 +173,38 @@ export const assistantSession = {
 };
 
 /**
+ * The hero scenario: the shortest honest path from "a person has a problem" to "the
+ * assistant answered it", so a visitor sees both halves of the product working together
+ * in about eight seconds without reading anything.
+ *
+ * Pacing matters more than content here. The two human beats are deliberately fast — a
+ * report and a question — because the assistant's working steps are the part worth
+ * watching, and nobody waits through a preamble to reach them. Keep the answer short:
+ * the hero pane is narrow, and the full version lives in the assistant section.
+ *
+ * The steps are the same run the assistant section plays in full, so the hero is showing
+ * that assistant, not a different one.
+ */
+export const heroScenario = {
+  // Measured, not guessed: these waits put the assistant to work ~1.7s after the
+  // scenario starts. Anything slower and the hero reads as a chat demo that happens
+  // to have a bot at the end, which is the opposite of the point.
+  beats: [
+    { from: 'kenji', time: '09:13', body: 'Staging just rejected a 47 MB upload.', wait: 450 },
+    {
+      from: 'marta',
+      time: '09:14',
+      mine: true,
+      ask: true,
+      body: '@assistant where else is an upload limit set?',
+      wait: 900,
+    },
+  ],
+  answer:
+    'Three places. `deploy/nginx.conf` caps the request body — `32m` on staging, `512m` in production, which is the one you hit.',
+};
+
+/**
  * The payoff (MANIFEST §6.5) — the artefact the conversation produced, shown the way a
  * reader in the hub actually consumes it.
  */
