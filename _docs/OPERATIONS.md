@@ -33,9 +33,30 @@ committed one; git tracks content, not timestamps.)
    writes the Tauri/WebView2 binary to `desktop/dist/<version>/ContentHub-Native.exe`
    with a matching `.md5`, and prints the size.
 
-2. **Copy the binary into `public/download/ContentHub-Native.exe`.** Keep that
-   exact filename: the URL is linked from outside this site and installed
-   clients poll it, so it must never gain a version or change name (hazard 2).
+2. **Copy the binary from the per-version folder** —
+   `desktop/dist/<version>/ContentHub-Native.exe` — into
+   `public/download/ContentHub-Native.exe`. Keep that exact filename: the URL is
+   linked from outside this site and installed clients poll it, so it must never
+   gain a version or change name (hazard 2).
+
+   **Do not copy from the mirror at `desktop/dist/ContentHub-Native.exe`.** It is
+   meant to hold the latest build, but it has been observed holding the *previous*
+   one — on 2026-07-28 the mirror carried 0.3.4 with a timestamp one minute
+   *after* 0.3.5 was built, and its `.md5` sidecar agreed with the stale binary,
+   so nothing about it looked wrong. Copying it would have published 0.3.4 under
+   the label 0.3.5. The per-version folder is authoritative: the folder name, the
+   exe's own FileVersion and the `version.json` beside it all agree.
+
+   **Cross-check before going further** — the file you just copied must report the
+   version you think you are shipping:
+
+   ```powershell
+   (Get-Item public/download/ContentHub-Native.exe).VersionInfo.FileVersion
+   ```
+
+   If that disagrees with the folder you copied from, stop and work out which
+   build is real. This check costs a second and catches the one failure mode that
+   is invisible afterwards.
 
 3. **Do not touch the `.md5` by hand.** `npm run build` runs `prebuild` →
    `scripts/write-download-hash.mjs`, which rewrites the sidecar from the bytes

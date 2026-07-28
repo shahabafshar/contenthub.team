@@ -86,7 +86,9 @@ not the framing. Do not fold one back into the other.
 - **Deliberately unfinished:** macOS, Linux, Android and iOS are rendered as genuinely
   `disabled` buttons showing real status. That is not a placeholder; it is the honest state.
 
-Published Windows build: **0.3.4**, 4,198,400 bytes, md5 `f0501e69…`.
+Published Windows build: **0.3.5**, 4,200,960 bytes, md5 `009f4f23…`. Always taken from the
+application repo's **per-version folder**, never the dist-root mirror — see `OPERATIONS.md`
+step 2 for why.
 
 Last verification (2026-07-27, against a served build): `_tools/verify.mjs` **50 passed,
 0 failed**; project-specific harness **51 passed, 0 failed**. Screenshots reviewed in dark,

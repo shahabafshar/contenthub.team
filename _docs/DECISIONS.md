@@ -14,6 +14,32 @@ no local paths, internal hostnames or deployment topology. Tier A — credential
 
 ---
 
+## 2026-07-28 — Desktop builds are taken from the per-version folder, not the dist mirror
+
+Publishing 0.3.5 turned up a trap in the runbook. The application repo's build script keeps
+each build in `desktop/dist/<version>/` and mirrors the latest to `desktop/dist/`, and the
+runbook said to copy "the binary" — which in practice meant the mirror.
+
+The mirror was stale. It held **0.3.4**, timestamped one minute *after* 0.3.5 was built, with
+a `.md5` sidecar that agreed with the stale binary. Nothing about it looked wrong from the
+website side: right filename, right size to the nearest MB, self-consistent hash. Copying it
+would have published 0.3.4 under the label 0.3.5 — the same class of defect as the
+`desktopVersion` drift recorded below, arriving by a different route.
+
+The runbook now sources from the per-version folder, which is authoritative because three
+independent things agree there: the folder name, the exe's own FileVersion, and the
+`version.json` beside it. It also adds a mandatory cross-check of FileVersion against the
+folder you copied from, before anything else happens. That check is cheap and it catches the
+one failure mode that leaves no trace afterwards.
+
+Rejected: fixing the mirror in the application repo instead — the website should not depend
+on a convenience copy being correct when an authoritative source is right there. Rejected:
+trusting the sidecar that ships beside the binary — it was regenerated from the stale bytes
+and therefore agreed with them, which is precisely why a self-consistent hash proves nothing
+about *which build* you have.
+
+---
+
 ## 2026-07-28 — The demos hold a constant height; nothing on the page moves while they play
 
 The step rows were `display: none` until the engine reached them, so the assistant's panel
