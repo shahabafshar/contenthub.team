@@ -2,6 +2,7 @@
 /** Meets MANIFEST §9 (SEO) and §8.1 (progressive enhancement). */
 import '../styles/global.css';
 import BackToTop from '../components/BackToTop.astro';
+import AiIcons from '../components/AiIcons.astro';
 // Derived, not restated: these two version strings drifted once and the page advertised
 // 0.3.0 while serving a 0.3.1 binary. One source, so it cannot happen again.
 import { desktopVersion } from '../site.js';
@@ -123,6 +124,7 @@ const jsonLd = {
   </head>
   <body id="top">
     <a class="skip-link" href="#main">Skip to content</a>
+    <AiIcons />
     <slot />
     <BackToTop />
 

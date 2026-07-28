@@ -1,5 +1,12 @@
 ---
-/** Initials disc. Decorative: the author's name is always in adjacent text. */
+/**
+ * Identity chip. Decorative: the person's name is always in adjacent text.
+ *
+ * Mirrors the app's `senderStyle.js` — a hue per person, rendered as
+ * `linear-gradient(135deg, hsl(h 62% 55%), hsl(h 60% 42%))`, so the same person carries
+ * the same colour on every surface. The assistant is the one special sender: a fixed
+ * purple→pink brand gradient with a robot glyph rather than a hashed hue and initials.
+ */
 interface Props {
   person: {
     name: string;
@@ -20,7 +27,21 @@ const cls = ['avatar', size === 'sm' && 'avatar-sm', person.bot && 'avatar-bot']
 
 <span
   class={cls}
-  style={person.hue != null ? `--hue:${person.hue}` : undefined}
+  style={person.hue != null && !person.bot ? `--hue:${person.hue}` : undefined}
   data-presence={showPresence ? person.presence : undefined}
-  aria-hidden="true">{person.initials}</span
->
+  aria-hidden="true">
+  {
+    person.bot ? (
+      <svg viewBox="0 0 24 24" class="bot-glyph" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="8" width="16" height="11" rx="3" />
+        <path d="M12 8V5" />
+        <circle cx="12" cy="3.6" r="1.4" fill="currentColor" stroke="none" />
+        <path d="M2.5 12.5v3M21.5 12.5v3" />
+        <circle cx="9" cy="13" r="1.15" fill="currentColor" stroke="none" />
+        <circle cx="15" cy="13" r="1.15" fill="currentColor" stroke="none" />
+      </svg>
+    ) : (
+      person.initials
+    )
+  }
+</span>

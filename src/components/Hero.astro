@@ -1,10 +1,15 @@
 ---
 import Logo from './Logo.astro';
 import Avatar from './Avatar.astro';
-import { people, workspace } from '../conversation.js';
+import AiSteps from './AiSteps.astro';
+import { people, workspace, stream } from '../conversation.js';
 import { primaryPlatform, downloadUrl, desktopVersion } from '../site.js';
 
 const dl = primaryPlatform ? downloadUrl(primaryPlatform) : '#download';
+
+// The first two steps of the same tool run the demo below plays out in full, so the
+// hero and the conversation are showing one assistant, not two different ones.
+const heroSteps = (stream.find((b) => b.kind === 'assistant')?.steps ?? []).slice(0, 2);
 ---
 
 <section class="hero">
@@ -74,25 +79,45 @@ const dl = primaryPlatform ? downloadUrl(primaryPlatform) : '#download';
                 <span class="pane-meta">{workspace.members} members</span>
               </div>
 
+              <!-- Same bubble language as the conversation demo below: your own
+                   messages right in the primary fill with ticks, everyone else's
+                   left in the muted fill under a name in their identity colour. -->
               <div class="pane-msgs">
-                <div class="m">
-                  <Avatar person={people.marta} size="sm" />
-                  <div>
-                    <p class="m-who">{people.marta.first} <i>09:12</i></p>
-                    <p class="m-body">
-                      Uploads over about 40 MB fail at 100% — the bar completes, the
-                      document never appears.
+                <div class="m is-mine">
+                  <div class="m-col">
+                    <div class="m-bubble">
+                      Uploads over about 40 MB fail at 100% — the document never appears.
+                    </div>
+                    <p class="m-meta">
+                      09:12
+                      <svg class="m-ticks" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M18 6 7 17l-4-4" />
+                        <path d="m22 8-9 9" />
+                      </svg>
                     </p>
                   </div>
                 </div>
+
                 <div class="m">
                   <Avatar person={people.daniel} size="sm" />
-                  <div>
-                    <p class="m-who">{people.daniel.first} <i>09:16</i></p>
-                    <p class="m-body">
-                      Found it — the staging proxy caps the body at 32 MB.
+                  <div class="m-col">
+                    <p class="m-who" style={`--hue:${people.daniel.hue}`}>
+                      {people.daniel.first}
                     </p>
+                    <div class="m-bubble">Found it — the staging proxy caps the body at 32 MB.</div>
                     <p class="m-thread">3 replies</p>
+                  </div>
+                </div>
+
+                <!-- The assistant, mid-tool-call. This is the product's real working
+                     indicator, frozen at a moment — see AiSteps.astro. -->
+                <div class="m m-ai">
+                  <Avatar person={people.assistant} size="sm" />
+                  <div class="m-col">
+                    <p class="m-who m-who-ai">Assistant</p>
+                    <div class="m-bubble m-bubble-ai">
+                      <AiSteps steps={heroSteps} id="hero" mode="static" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -317,34 +342,95 @@ const dl = primaryPlatform ? downloadUrl(primaryPlatform) : '#download';
 
   .m {
     display: flex;
-    gap: 9px;
+    gap: 7px;
     min-width: 0;
+    align-items: flex-start;
+  }
+
+  .m > :global(.avatar) {
+    margin-top: 18px;
+    width: 22px;
+    height: 22px;
+    font-size: 0.52rem;
+  }
+
+  .m.is-mine {
+    flex-direction: row-reverse;
+  }
+
+  .m-col {
+    min-width: 0;
+    max-width: 84%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .m.is-mine .m-col {
+    align-items: flex-end;
+  }
+
+  .m-ai .m-col {
+    max-width: 100%;
+    flex: 1;
   }
 
   .m-who {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     font-weight: 700;
+    margin-bottom: 2px;
+    color: hsl(var(--hue) 60% 62%);
   }
 
-  .m-who i {
-    font-style: normal;
-    font-weight: 500;
-    color: var(--text-3);
-    margin-left: 5px;
-    font-size: 0.66rem;
+  .m-who-ai {
+    color: var(--violet);
   }
 
-  .m-body {
-    margin-top: 2px;
-    font-size: 0.76rem;
+  .m-bubble {
+    padding: 6px 10px;
+    border-radius: 12px;
+    border-bottom-left-radius: 4px;
+    background: var(--surface-2);
     color: var(--text-2);
+    font-size: 0.73rem;
     line-height: 1.5;
   }
 
+  .m.is-mine .m-bubble {
+    background: var(--accent);
+    color: #fff;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 4px;
+  }
+
+  .m-bubble-ai {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 7px 9px;
+  }
+
+  .m-meta {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 3px;
+    font-size: 0.62rem;
+    color: var(--text-3);
+  }
+
+  .m-ticks {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: var(--accent-2);
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
   .m-thread {
-    margin-top: 6px;
+    margin-top: 5px;
     display: inline-block;
-    font-size: 0.68rem;
+    font-size: 0.66rem;
     font-weight: 600;
     color: var(--accent-2);
   }

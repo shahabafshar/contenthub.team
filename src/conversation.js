@@ -19,13 +19,31 @@ export const workspace = {
   members: 9,
 };
 
+/**
+ * Whose eyes the demo is seen through. The messenger renders your own messages as
+ * right-aligned primary-filled bubbles and everyone else's as left-aligned muted ones,
+ * so the demo needs a viewer to be faithful.
+ */
+export const self = 'marta';
+
+/**
+ * `hue` mirrors the app's own identity colouring: a hash of the user id picks a hue, and
+ * the avatar is `linear-gradient(135deg, hsl(h 62% 55%), hsl(h 60% 42%))`. Same person,
+ * same hue, on every surface — see `senderStyle.js` in the application repo.
+ *
+ * The assistant is the one special sender there: its avatar is the robot glyph on a fixed
+ * purple→pink brand gradient rather than a hashed hue.
+ */
 export const people = {
   marta: { name: 'Marta Kowalczyk', first: 'Marta', role: 'Platform', initials: 'MK', hue: 247, presence: 'online' },
   daniel: { name: 'Daniel Okoro', first: 'Daniel', role: 'Backend', initials: 'DO', hue: 168, presence: 'online' },
   sofia: { name: 'Sofia Ferrara', first: 'Sofia', role: 'Documentation', initials: 'SF', hue: 292, presence: 'away' },
   kenji: { name: 'Kenji Tanaka', first: 'Kenji', role: 'QA', initials: 'KT', hue: 32, presence: 'online' },
   layla: { name: 'Layla Haddad', first: 'Layla', role: 'Support', initials: 'LH', hue: 340, presence: 'online' },
-  assistant: { name: 'Assistant', first: 'Assistant', role: 'AI', initials: 'AI', hue: 205, bot: true, presence: 'online' },
+  // The app's canonical assistant avatar is the robot emoji on a purple→pink brand
+  // gradient. `Avatar.astro` draws the robot as SVG instead: the emoji renders as a tofu
+  // box wherever no colour emoji font is installed, including the verification browser.
+  assistant: { name: 'Assistant', first: 'Assistant', role: 'AI', initials: 'AI', bot: true, presence: 'online' },
 };
 
 /**
@@ -105,10 +123,22 @@ export const stream = [
     from: 'marta',
     time: '09:24',
     ask: '@assistant where else is an upload limit configured?',
+    /**
+     * The assistant's working steps, in the shape the app's own `AISteps` component
+     * renders: a tool slug, the human label the tool registry gives it, a short preview
+     * of the arguments, and how long the step took.
+     *
+     * **Only real tool slugs belong here** — `search_hub`, `search_messages`,
+     * `web_search`, `fetch_page`, `read_list`, `my_items`, `read_attachment`, `remember`,
+     * plus the pipeline steps `analyze`, `summarize`, `think`, `review`, `handoff`.
+     * Inventing one would put a capability on the page that does not exist (MANIFEST §1.5)
+     * and would render with the fallback wrench icon.
+     */
     steps: [
-      { tool: 'search_messages', arg: 'client_max_body_size', result: '4 matches across 2 channels' },
-      { tool: 'read_document', arg: 'deploy/nginx.conf', result: '2 server blocks' },
-      { tool: 'read_document', arg: 'backend/settings.py', result: '1 match' },
+      { tool: 'search_messages', label: 'Search messages', preview: 'client_max_body_size', ms: 900 },
+      { tool: 'search_hub', label: 'Search the hub', preview: 'upload limit', ms: 1400 },
+      { tool: 'read_attachment', label: 'Read an attached file', preview: 'nginx.conf', ms: 700 },
+      { tool: 'think', label: 'Waiting for the model to answer', preview: '', ms: 2300 },
     ],
     answer:
       'Three places set an upload ceiling. `deploy/nginx.conf` caps the request body — `32m` in the staging block, `512m` in production, which is the difference you hit. `DATA_UPLOAD_MAX_MEMORY_SIZE` in `backend/settings.py` only decides when Django spools to a temp file, so it will not reject a large upload. The SDK also refuses anything over 500 MB client-side before it starts. Only the nginx value differs between environments.',

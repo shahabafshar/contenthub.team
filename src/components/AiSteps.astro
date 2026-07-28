@@ -1,0 +1,265 @@
+---
+/**
+ * Reproduction of the app's own `AISteps` component
+ * (`frontend/src/components/messenger/AISteps.jsx`), which is what a ContentHub user
+ * actually watches while the assistant works.
+ *
+ * The real thing has two states, and this renders both:
+ *   live     — a bordered "Working…" box, one row per step. Running rows show a spinning
+ *              loader and a counting timer; finished rows swap to a check and a fixed
+ *              duration.
+ *   finished — the box collapses to a single chip, "Worked · N steps · 5.3s", which
+ *              expands back to the full list on click.
+ *
+ * Icons are the same lucide glyphs the app maps each tool slug to, redrawn as inline
+ * paths. An unknown slug falls back to the wrench, exactly as `iconFor` does.
+ */
+/**
+ * `mode`:
+ *   'live'   — rows start pending and the demo engine drives them (the conversation).
+ *   'static' — a frozen snapshot: every step done except the last, which is mid-flight.
+ *              Needed anywhere outside the engine's reach, because the rows are hidden
+ *              until they carry a state class and would otherwise never appear.
+ */
+interface Props {
+  steps: Array<{ tool: string; label: string; preview?: string; ms: number }>;
+  id: string;
+  mode?: 'live' | 'static';
+}
+
+const { steps, id, mode = 'live' } = Astro.props;
+const frozenState = (i: number) =>
+  mode === 'static' ? (i < steps.length - 1 ? ' is-done' : ' is-running') : '';
+
+/** Matches the app's `fmtDur`: <10s one decimal, <60s whole seconds, else m + s. */
+function fmtDur(ms: number) {
+  const s = ms / 1000;
+  if (s < 10) return `${s.toFixed(1)}s`;
+  if (s < 60) return `${Math.round(s)}s`;
+  return `${Math.floor(s / 60)}m ${Math.round(s % 60)}s`;
+}
+
+const totalMs = steps.reduce((a, s) => a + (s.ms || 0), 0);
+---
+
+<div class="ai-steps" data-ai-steps data-id={id}>
+  {/* ── live: the working box ── */}
+  <div class="working" data-working role="status" aria-label="Assistant is working">
+    <p class="working-head">
+      <svg class="ic-spark" viewBox="0 0 24 24" aria-hidden="true"><use href="#ai-ic-think" /></svg>
+      Working…
+    </p>
+    {
+      steps.map((s, i) => (
+        <div
+          class={`row${frozenState(i)}`}
+          data-beat={mode === 'live' ? true : undefined}
+          data-wait={mode === 'live' ? s.ms : undefined}
+          data-row={i}>
+          <span class="state" aria-hidden="true">
+            <svg class="ic-run" viewBox="0 0 24 24"><use href="#ai-ic-loader" /></svg>
+            <svg class="ic-done" viewBox="0 0 24 24"><use href="#ai-ic-check" /></svg>
+          </span>
+          <svg class="ic-tool" viewBox="0 0 24 24" aria-hidden="true">
+            <use href={`#ai-ic-${s.tool}`} />
+          </svg>
+          <span class="label">
+            {s.label}
+            {s.preview && <span class="preview"> — {s.preview}</span>}
+          </span>
+          {/* Without scripting this is simply the final duration. While the demo
+              runs, the engine counts it up in whole seconds and then restores
+              `data-final`, which is how the live component behaves. */}
+          <span class="dur" data-dur data-final={fmtDur(s.ms)}>{fmtDur(s.ms)}</span>
+        </div>
+      ))
+    }
+  </div>
+
+  {/* ── finished: the collapsed chip ── */}
+  <button class="chip" type="button" data-chip aria-expanded="false" hidden data-js-only>
+    <svg class="ic-chev" viewBox="0 0 24 24" aria-hidden="true"><use href="#ai-ic-chevron" /></svg>
+    <svg class="ic-spark" viewBox="0 0 24 24" aria-hidden="true"><use href="#ai-ic-think" /></svg>
+    <span>Worked · {steps.length} step{steps.length === 1 ? '' : 's'} · {fmtDur(totalMs)}</span>
+  </button>
+</div>
+
+<style>
+  .ai-steps {
+    margin-bottom: 9px;
+    direction: ltr;
+  }
+
+  /* ── the working box ── */
+  .working {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+    padding: 7px 12px 8px;
+  }
+
+  .working-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--text-3);
+    padding-bottom: 2px;
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 0;
+    min-width: 0;
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .ic-spark {
+    color: var(--accent-2);
+  }
+
+  .ic-tool {
+    color: var(--text-3);
+  }
+
+  .state {
+    display: grid;
+    place-items: center;
+    width: 14px;
+    height: 14px;
+    flex: none;
+  }
+
+  .state > svg {
+    grid-area: 1 / 1;
+  }
+
+  .ic-run {
+    color: var(--accent-2);
+    animation: ai-spin 0.9s linear infinite;
+  }
+
+  .ic-done {
+    color: var(--mint);
+    display: none;
+  }
+
+  @keyframes ai-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .label {
+    font-size: 0.76rem;
+    color: var(--text);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .preview {
+    color: var(--text-3);
+  }
+
+  .dur {
+    font-size: 0.66rem;
+    color: var(--text-3);
+    font-variant-numeric: tabular-nums;
+    flex: none;
+  }
+
+  /* Rows start pending: hidden until the engine reaches them. A row that has
+     not started yet shows nothing at all, as in the app. */
+  :global(.js) .row {
+    display: none;
+  }
+
+  :global(.js) .row.is-running,
+  :global(.js) .row.is-done {
+    display: flex;
+  }
+
+  /* Finished rows: check instead of spinner, and the label calms down. */
+  .row.is-done .ic-run {
+    display: none;
+  }
+
+  .row.is-done .ic-done {
+    display: block;
+  }
+
+  .row.is-done .label {
+    color: var(--text-3);
+  }
+
+  /* ── finished: the box gives way to the chip, and reopens on click ──
+     Scoped to .js: with scripting off there is no animation to finish, so the
+     full step list simply stays visible and the chip is never rendered. */
+  :global(.js) .ai-steps.is-finished .working {
+    display: none;
+  }
+
+  :global(.js) .ai-steps.is-finished.is-open .working {
+    display: block;
+    margin-top: 5px;
+  }
+
+  /* "Working…" is a live label; once finished the chip carries the summary. */
+  :global(.js) .ai-steps.is-finished .working-head {
+    display: none;
+  }
+
+  /* ── the collapsed chip ── */
+  /* `display` on a class beats the UA's `[hidden] { display: none }`, so the chip
+     leaked into the live state until this was added. */
+  .chip[hidden] {
+    display: none;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 9px;
+    margin-left: -9px;
+    border-radius: 8px;
+    font-size: 0.76rem;
+    color: var(--text-3);
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .chip:hover {
+    background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+    color: var(--text);
+  }
+
+  .chip .ic-chev {
+    transition: transform 0.18s ease;
+  }
+
+  .chip[aria-expanded="true"] .ic-chev {
+    transform: rotate(90deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ic-run {
+      animation: none;
+    }
+  }
+</style>
