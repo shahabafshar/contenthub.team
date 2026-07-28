@@ -198,7 +198,16 @@ Every one of these cost time or shipped a defect during the initial build.
 20. **Two demos means two of every control.** Playwright's strict mode rejects a bare
     `[data-play]` / `[data-controls]` locator now; scope harness selectors to
     `#conversation` or `#assistant`, or you will test the wrong one.
-21. **A class-level `display` beats the UA's `[hidden]` rule.** The assistant's collapsed
+21. **Never reveal demo content with `display`.** Anything that appears mid-playback must
+    already occupy its space and be revealed by opacity, or the panel grows and shoves the
+    rest of the page down — the step rows cost 108px of movement that way. Step rows carry
+    a fixed `height` for the same reason, and the finished state swaps only the box's
+    header, never the box. Re-run `probe-shift`-style sampling after touching any demo:
+    the target is ≤1px.
+22. **Use `minmax(0, 1fr)`, never a bare `1fr`.** A `1fr` track will not shrink below its
+    content's min-content width, so a column holding anything intrinsically wide blows out
+    and the page scrolls sideways at 390px. This already happened once, in `.split`.
+23. **A class-level `display` beats the UA's `[hidden]` rule.** The assistant's collapsed
     chip leaked into the live state until `.chip[hidden] { display: none }` was added.
     Anything toggled by the `hidden` attribute needs the same guard.
 

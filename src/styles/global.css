@@ -207,9 +207,13 @@ main[id] {
   margin-bottom: 13px;
 }
 
+/* `minmax(0, 1fr)`, never a bare `1fr`: a `1fr` track refuses to shrink below its
+   content's min-content width, so a column holding something intrinsically wide —
+   the assistant's step rows — blew the track out to 426px inside a 342px container
+   and pushed the page sideways at 390px. */
 .split {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: center;
   gap: 60px;
 }
@@ -257,7 +261,7 @@ main[id] {
 
 @media (max-width: 900px) {
   .split {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 38px;
   }
 

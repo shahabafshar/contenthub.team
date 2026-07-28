@@ -14,6 +14,39 @@ no local paths, internal hostnames or deployment topology. Tier A — credential
 
 ---
 
+## 2026-07-28 — The demos hold a constant height; nothing on the page moves while they play
+
+The step rows were `display: none` until the engine reached them, so the assistant's panel
+grew **108px** over a run. Everything below the hero was shoved down by that much, and
+because the hero grid is centred, the headline and buttons drifted 54px as well. Measured,
+not eyeballed: `probe-shift.mjs` sampled the window, the copy column and the next section
+every 150ms.
+
+Two changes fix it. Rows now stay in the layout at every stage and are revealed by opacity,
+with a fixed `height` so the panel is full size from the first frame. And the finished state
+no longer swaps the whole box for a chip — the box stays and only its **header** swaps,
+"Working…" becoming "Worked · 4 steps · 5.3s" with a chevron. The rows collapse only when
+the visitor clicks that summary, which is movement they asked for rather than movement that
+happens under them.
+
+Re-measured after: 108px → **1px**, which is sub-pixel rounding.
+
+A side effect worth keeping: the completed steps now stay on screen instead of folding away
+a second after they finish, which suits a page whose argument is "it does the work first".
+
+Reserving the row space also exposed a real overflow at 390px, because un-started rows now
+contribute their intrinsic width. The cause was a **bare `1fr` grid track**: `1fr` will not
+shrink below its content's min-content width, so `.split` blew out to 426px inside a 342px
+container. Every flexible track in the site is now `minmax(0, 1fr)`. `documentElement.scrollWidth`
+is back to exactly 390.
+
+Rejected: reserving a `min-height` on the steps container instead — the collapse would then
+leave a blank gap inside the bubble. Rejected: keeping the auto-collapse and absorbing the
+shrink at the window level — it needs a fixed window height per breakpoint, which is fragile
+and clips content the moment copy changes.
+
+---
+
 ## 2026-07-28 — The hero plays a scenario where chat hands off to the assistant
 
 **This supersedes part of the entry below**, which removed the assistant from the hero on

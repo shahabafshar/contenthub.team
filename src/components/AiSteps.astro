@@ -45,10 +45,18 @@ const totalMs = steps.reduce((a, s) => a + (s.ms || 0), 0);
 <div class="ai-steps" data-ai-steps data-id={id}>
   {/* ── live: the working box ── */}
   <div class="working" data-working role="status" aria-label="Assistant is working">
-    <p class="working-head">
+    {/* Two headers of identical height, swapped in place when the run finishes.
+        Swapping rather than replacing the whole box is what keeps the panel a
+        constant height while it plays — see the note on `.rows` below. */}
+    <p class="working-head" data-head-live>
       <svg class="ic-spark" viewBox="0 0 24 24" aria-hidden="true"><use href="#ai-ic-think" /></svg>
       Working…
     </p>
+    <button class="working-head chip" type="button" data-chip aria-expanded="true" hidden>
+      <svg class="ic-chev" viewBox="0 0 24 24" aria-hidden="true"><use href="#ai-ic-chevron" /></svg>
+      <svg class="ic-spark" viewBox="0 0 24 24" aria-hidden="true"><use href="#ai-ic-think" /></svg>
+      Worked · {steps.length} step{steps.length === 1 ? '' : 's'} · {fmtDur(totalMs)}
+    </button>
     {
       steps.map((s, i) => (
         <div
@@ -76,18 +84,18 @@ const totalMs = steps.reduce((a, s) => a + (s.ms || 0), 0);
     }
   </div>
 
-  {/* ── finished: the collapsed chip ── */}
-  <button class="chip" type="button" data-chip aria-expanded="false" hidden data-js-only>
-    <svg class="ic-chev" viewBox="0 0 24 24" aria-hidden="true"><use href="#ai-ic-chevron" /></svg>
-    <svg class="ic-spark" viewBox="0 0 24 24" aria-hidden="true"><use href="#ai-ic-think" /></svg>
-    <span>Worked · {steps.length} step{steps.length === 1 ? '' : 's'} · {fmtDur(totalMs)}</span>
-  </button>
 </div>
 
 <style>
+  /* `min-width: 0` down the whole chain, plus a clamp on the box: now that
+     un-started rows sit in the layout rather than being `display: none`, their
+     full label width counts toward intrinsic width and pushed the page past the
+     viewport at 390px. A flex/grid child will not shrink below its content
+     without this. */
   .ai-steps {
     margin-bottom: 9px;
     direction: ltr;
+    min-width: 0;
   }
 
   /* ── the working box ── */
@@ -96,6 +104,8 @@ const totalMs = steps.reduce((a, s) => a + (s.ms || 0), 0);
     border-radius: 10px;
     background: color-mix(in srgb, var(--surface-2) 70%, transparent);
     padding: 7px 12px 8px;
+    min-width: 0;
+    overflow: hidden;
   }
 
   .working-head {
@@ -184,15 +194,31 @@ const totalMs = steps.reduce((a, s) => a + (s.ms || 0), 0);
     flex: none;
   }
 
-  /* Rows start pending: hidden until the engine reaches them. A row that has
-     not started yet shows nothing at all, as in the app. */
+  /* Rows stay in flow at every stage and are revealed by opacity, never by
+     `display`. They used to be `display: none` until the engine reached them,
+     which grew the panel 108px as the run progressed and shoved the rest of the
+     page down with it. Reserving the space up front makes the panel a constant
+     height, so nothing outside it moves while the assistant works. */
+  .row {
+    height: 22px;
+  }
+
   :global(.js) .row {
-    display: none;
+    opacity: 0.22;
+    transition: opacity 0.25s ease;
   }
 
   :global(.js) .row.is-running,
   :global(.js) .row.is-done {
-    display: flex;
+    opacity: 1;
+  }
+
+  /* A row that has not started shows no state icon — it is a placeholder holding
+     its own space, not a step claiming to have run. */
+  :global(.js) .row:not(.is-running):not(.is-done) .ic-run,
+  :global(.js) .row:not(.is-running):not(.is-done) .ic-done,
+  :global(.js) .row:not(.is-running):not(.is-done) .dur {
+    visibility: hidden;
   }
 
   /* Finished rows: check instead of spinner, and the label calms down. */
@@ -208,44 +234,33 @@ const totalMs = steps.reduce((a, s) => a + (s.ms || 0), 0);
     color: var(--text-3);
   }
 
-  /* ── finished: the box gives way to the chip, and reopens on click ──
-     Scoped to .js: with scripting off there is no animation to finish, so the
-     full step list simply stays visible and the chip is never rendered. */
-  :global(.js) .ai-steps.is-finished .working {
+  /* ── finished ──
+     The box stays; only its header swaps, so finishing costs no height. The rows
+     collapse only when the visitor clicks the summary, which is a movement they
+     asked for rather than one that happens under them. */
+  :global(.js) .ai-steps.is-finished [data-head-live] {
     display: none;
   }
 
-  :global(.js) .ai-steps.is-finished.is-open .working {
-    display: block;
-    margin-top: 5px;
-  }
-
-  /* "Working…" is a live label; once finished the chip carries the summary. */
-  :global(.js) .ai-steps.is-finished .working-head {
+  :global(.js) .ai-steps.is-collapsed .row {
     display: none;
   }
 
-  /* ── the collapsed chip ── */
-  /* `display` on a class beats the UA's `[hidden] { display: none }`, so the chip
-     leaked into the live state until this was added. */
+  /* ── the finished summary, which is the box's header once the run ends ──
+     `display` on a class beats the UA's `[hidden] { display: none }`, so this
+     guard has to come first or the summary leaks into the live state. */
   .chip[hidden] {
     display: none;
   }
 
   .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 9px;
-    margin-left: -9px;
-    border-radius: 8px;
-    font-size: 0.76rem;
-    color: var(--text-3);
-    transition: background 0.15s ease, color 0.15s ease;
+    width: 100%;
+    text-align: left;
+    border-radius: 6px;
+    transition: color 0.15s ease;
   }
 
   .chip:hover {
-    background: color-mix(in srgb, var(--surface-2) 70%, transparent);
     color: var(--text);
   }
 
@@ -255,6 +270,12 @@ const totalMs = steps.reduce((a, s) => a + (s.ms || 0), 0);
 
   .chip[aria-expanded="true"] .ic-chev {
     transform: rotate(90deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chip .ic-chev {
+      transition: none;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

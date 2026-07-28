@@ -220,6 +220,7 @@ import { people, assistantSession as s } from '../conversation.js';
   .thread-body {
     padding: 18px 16px 4px;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 14px;
     background: var(--bg-raised);
   }
@@ -279,6 +280,7 @@ import { people, assistantSession as s } from '../conversation.js';
   .bubble-ai {
     background: var(--surface);
     border: 1px solid var(--border);
+    min-width: 0;
   }
 
   .body {

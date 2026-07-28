@@ -103,12 +103,12 @@
 
     const resetStepBlocks = () => {
       root.querySelectorAll('[data-ai-steps]').forEach((block) => {
-        block.classList.remove('is-finished', 'is-open');
+        block.classList.remove('is-finished', 'is-collapsed');
         block.querySelectorAll('.row').forEach((r) => r.classList.remove('is-running', 'is-done'));
         const chip = block.querySelector('[data-chip]');
         if (chip) {
           chip.hidden = true;
-          chip.setAttribute('aria-expanded', 'false');
+          chip.setAttribute('aria-expanded', 'true');
         }
       });
     };
@@ -213,12 +213,13 @@
       });
     });
 
-    // The finished chip reopens the step list, as it does in the app.
+    // The summary collapses and reopens the step list. It starts expanded and only
+    // moves on a click, so the panel never resizes on its own.
     root.querySelectorAll('[data-chip]').forEach((chip) => {
       chip.addEventListener('click', () => {
         const block = chip.closest('[data-ai-steps]');
-        const open = block.classList.toggle('is-open');
-        chip.setAttribute('aria-expanded', String(open));
+        const collapsed = block.classList.toggle('is-collapsed');
+        chip.setAttribute('aria-expanded', String(!collapsed));
       });
     });
 
