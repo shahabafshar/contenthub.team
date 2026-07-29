@@ -58,6 +58,20 @@ committed one; git tracks content, not timestamps.)
    build is real. This check costs a second and catches the one failure mode that
    is invisible afterwards.
 
+   **A version folder can exist before the build that fills it has finished.**
+   `build-all.mjs` produces the Electron artifact first and the Tauri one second,
+   and it writes `version.json` early — so `desktop/dist/<new>/` can hold
+   `ContentHub.exe`, a bumped `version.json` and no `ContentHub-Native.exe` at
+   all, while the mirror still carries the *previous* release. That is what
+   0.3.8 looked like for its first few minutes. If the native exe is missing,
+   the build is still running: check for `cargo`/`rustc` processes and wait.
+   Never fall back to the mirror to "get something" — it will publish the old
+   binary under the new version number.
+
+   When it does appear, let it settle before hashing: wait until its size stops
+   changing *and* it can be opened without a sharing violation, or you will
+   fingerprint a partially written file.
+
 3. **Do not touch the `.md5` by hand.** `npm run build` runs `prebuild` →
    `scripts/write-download-hash.mjs`, which rewrites the sidecar from the bytes
    actually on disk. Cloudflare runs the same build, so the hash cannot drift.
