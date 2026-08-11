@@ -140,3 +140,23 @@ Then assert, over HTTP:
 A local preview may not land on port 4321 if another site's preview already
 holds it — Astro silently picks the next free port and prints it. Check the
 title of the page you are testing before trusting a pass.
+
+**Better: do not use `astro preview` for verification at all.** It hunts for a
+free port (this session saw it land anywhere from 4321 to 4367), and a
+long-running background server gets reaped between steps, so a check can fail
+for reasons that have nothing to do with the build. Serve `dist/` yourself on a
+port you choose, and start and stop it inside a single command so there is no
+window for it to disappear:
+
+```powershell
+$srv = Start-Process node -ArgumentList "<scratch>/serve-dist.mjs","<site>/dist","4499" -PassThru -WindowStyle Hidden
+Start-Sleep -Seconds 2
+node <scratch>/verify-release.mjs http://localhost:4499 <site> <version>
+Stop-Process -Id $srv.Id -Force
+```
+
+Both scripts live in the session scratchpad and are disposable — **expect them to
+be gone**, along with the scratchpad's `node_modules`. Rebuilding them is minutes
+of work and the assertions they must make are listed above and in `HANDOFF.md`.
+`_tools/verify.mjs` keeps its own playwright install, which is why it survives
+when a scratchpad harness does not.
