@@ -86,7 +86,15 @@ committed one; git tracks content, not timestamps.)
    - `src/components/Download.astro` — the section's opening paragraph.
 
    The site quotes **MiB** (`bytes / 1048576`), rounded to one decimal and with
-   a trailing `.0` dropped: 2,728,448 → "2.6 MB"; 4,196,864 → "4 MB".
+   a trailing `.0` dropped: 2,728,448 → "2.6 MB"; 4,196,864 → "4 MB";
+   4,260,864 → "4.1 MB". It really does move — 0.3.9 stated 3.9 MB and 0.3.10
+   states 4.1 MB — so re-derive it every time rather than assuming the previous
+   figure still holds.
+
+   **Sort version folders as versions, not as text.** Now that the numbering has
+   passed 0.3.9, a lexical sort puts `0.3.10` *before* `0.3.9` and would quietly
+   publish the older build. In PowerShell:
+   `Sort-Object { [version]$_.Name }`.
 
 5. **Bump the version — one place.** `desktopVersion` in `src/site.js` must match
    the binary's own FileVersion. Read it from the file you just copied:

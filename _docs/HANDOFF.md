@@ -86,7 +86,7 @@ not the framing. Do not fold one back into the other.
 - **Deliberately unfinished:** macOS, Linux, Android and iOS are rendered as genuinely
   `disabled` buttons showing real status. That is not a placeholder; it is the honest state.
 
-Published Windows build: **0.3.9**, 4,107,776 bytes (**3.9 MB**), md5 `4b7284da…`. Always
+Published Windows build: **0.3.10**, 4,260,864 bytes (**4.1 MB**), md5 `b8b0143f…`. Always
 taken from the application repo's **per-version folder**, never the dist-root mirror — see
 `OPERATIONS.md` step 2 for why. The stated size is not a constant: 0.3.6 shrank to 3.9 MB
 from 0.3.5's 4 MB, and all four quoted sizes had to change with it. Re-derive the rounding
