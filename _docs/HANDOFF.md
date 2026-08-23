@@ -86,11 +86,21 @@ not the framing. Do not fold one back into the other.
 - **Deliberately unfinished:** macOS, Linux, Android and iOS are rendered as genuinely
   `disabled` buttons showing real status. That is not a placeholder; it is the honest state.
 
-Published Windows build: **0.3.10**, 4,260,864 bytes (**4.1 MB**), md5 `b8b0143f…`. Always
+Published Windows build: **0.3.15**, 4,268,544 bytes (**4.1 MB**), md5 `4b73ca50…`. Always
 taken from the application repo's **per-version folder**, never the dist-root mirror — see
-`OPERATIONS.md` step 2 for why. The stated size is not a constant: 0.3.6 shrank to 3.9 MB
-from 0.3.5's 4 MB, and all four quoted sizes had to change with it. Re-derive the rounding
-every time rather than assuming it held.
+`OPERATIONS.md` step 2 for why. On 2026-08-23 the mirror was six days stale and held the
+0.3.14 binary, while the dist root's own `version.json` said 0.3.15 and its `.version` file
+said 0.3.12 — three mutually inconsistent claims. The per-version folder was self-consistent
+and correct, as it always has been.
+
+**Three files ship, not one:** the exe, `.md5`, and `.version`. The `.version` is what the
+self-updater acts on — a stale one silently freezes updates for every installed client, and
+that has already happened once. Both sidecars are generated on `prebuild`, the `.md5` from
+the bytes and the `.version` from `desktopVersion`, so bumping the version updates the page
+and the sidecar together. See `OPERATIONS.md` step 3.
+
+The stated size is not a constant: 0.3.6 shrank to 3.9 MB from 0.3.5's 4 MB and 0.3.10 grew
+back to 4.1 MB. Re-derive the rounding every time rather than assuming it held.
 
 Last verification (2026-07-27, against a served build): `_tools/verify.mjs` **50 passed,
 0 failed**; project-specific harness **51 passed, 0 failed**. Screenshots reviewed in dark,

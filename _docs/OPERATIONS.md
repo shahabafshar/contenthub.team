@@ -72,10 +72,30 @@ committed one; git tracks content, not timestamps.)
    changing *and* it can be opened without a sharing violation, or you will
    fingerprint a partially written file.
 
-3. **Do not touch the `.md5` by hand.** `npm run build` runs `prebuild` →
-   `scripts/write-download-hash.mjs`, which rewrites the sidecar from the bytes
-   actually on disk. Cloudflare runs the same build, so the hash cannot drift.
-   To regenerate it without a full build: `npm run download:hash`.
+3. **Two sidecars ship beside the binary, and both are generated — never hand-edited.**
+
+   | File | What reads it | What it decides |
+   |---|---|---|
+   | `ContentHub-Native.exe.md5` | the updater, after downloading | that the download arrived intact |
+   | `ContentHub-Native.exe.version` | the updater, before downloading | **whether to update at all** |
+
+   The `.version` sidecar is the load-bearing one. The 0.3.7+ self-updater compares
+   the published semver with its own; the md5 only checks integrity afterwards.
+   Version — never md5 — decides direction, so a client cannot be walked backwards
+   onto an older build.
+
+   **A stale `.version` fails silently.** Clients read their own version back, decide
+   there is nothing newer, and stop updating. Nothing on the site looks wrong: the
+   exe is new, the md5 matches it, the page shows the right number. This has already
+   happened once — publishing only the exe and the md5 gave every installed client a
+   404 on `.version` and froze auto-updates for all 0.3.10 clients.
+
+   Both sidecars are now written by `scripts/write-download-hash.mjs` on `prebuild`:
+   the md5 from the bytes on disk, the version from `desktopVersion` in `src/site.js`.
+   Bumping `desktopVersion` therefore updates the page *and* the sidecar together, and
+   they cannot disagree. Keep that wiring intact. Cloudflare runs the same build, so
+   neither sidecar can drift on the deployed site. To regenerate both without a full
+   build: `npm run download:hash`.
 
 4. **Re-derive every stated size.** The site quotes the download size in four
    places, and a stale figure is a false claim on a public page (MANIFEST §1.5):
@@ -136,6 +156,8 @@ Then assert, over HTTP:
 - the binary is served, its first two bytes are `MZ`, and it is under 25 MiB
   (Cloudflare's per-file asset limit);
 - the `.md5` is served and is a bare lowercase 32-character digest;
+- **the `.version` is served and equals the version you are shipping** — if this
+  404s or lags, installed clients silently stop updating;
 - **that digest equals the MD5 of the bytes actually served** — this is the one
   that matters, and it is the reason step 3 exists;
 - every size stated on the page matches the real file, and **the superseded size

@@ -15,6 +15,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { desktopVersion } from '../src/site.js';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const dir = path.join(root, 'public', 'download');
@@ -40,4 +41,19 @@ for (const name of binaries) {
   writeFileSync(sidecar, `${digest}\n`);
   const state = existing === digest ? 'unchanged' : existing ? `updated from ${existing}` : 'created';
   console.log(`[download-hash] ${name}.md5 ${state} — ${digest}`);
+
+  // The .version sidecar is what the self-updater actually acts on: it compares
+  // the published semver with its own and uses the md5 only to check the download
+  // arrived intact. Version — never md5 — decides direction, so a client cannot be
+  // walked backwards onto an older build.
+  //
+  // It is derived from `desktopVersion` rather than maintained by hand because a
+  // stale one is silent: clients keep seeing their own version, decide there is
+  // nothing to do, and stop updating. That happened once already, freezing every
+  // 0.3.10 client, and nothing on the site looked wrong.
+  const vFile = `${file}.version`;
+  const prev = existsSync(vFile) ? readFileSync(vFile, 'utf8').trim() : null;
+  writeFileSync(vFile, `${desktopVersion}\n`);
+  const vState = prev === desktopVersion ? 'unchanged' : prev ? `updated from ${prev}` : 'created';
+  console.log(`[download-hash] ${name}.version ${vState} — ${desktopVersion}`);
 }
