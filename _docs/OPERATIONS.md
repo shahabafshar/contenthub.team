@@ -72,6 +72,24 @@ committed one; git tracks content, not timestamps.)
    changing *and* it can be opened without a sharing violation, or you will
    fingerprint a partially written file.
 
+   **When there is no per-version folder at all.** `build-all.mjs` is what creates
+   `desktop/dist/<version>/` and its sidecars; if it was not run, the Tauri build can
+   exist only as the raw compiler output,
+   `desktop-win/src-tauri/target/release/contenthub-win.exe`. That file is upstream of
+   both the per-version folder and the mirror — it is what they are copied *from* — so
+   it is acceptable to publish from it, on one condition: its FileVersion must equal the
+   version in **all three** of `desktop/package.json`,
+   `desktop-win/src-tauri/tauri.conf.json` and `desktop-win/src-tauri/Cargo.toml`. Four
+   agreeing sources is stronger evidence than the per-version folder usually gives. If
+   any of the four disagrees, stop — the binary and the source are out of step and
+   nothing on the site can tell you which is right.
+
+   The tell for this situation on 2026-09-01: the newest `dist/<version>/` folder held
+   only the Electron exe and a `version.json`, one version *below* what the three source
+   files said, while the raw Tauri output carried the source files' version. Afterwards,
+   ask for `node build-all.mjs` to be run so the app repo's `dist/` stops disagreeing
+   with what is published.
+
 3. **Two sidecars ship beside the binary, and both are generated — never hand-edited.**
 
    | File | What reads it | What it decides |

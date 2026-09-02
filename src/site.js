@@ -16,10 +16,11 @@ const downloadBase = `${repoUrl}/releases/latest/download`;
 // `(Get-Item <path>).VersionInfo.FileVersion`, do not copy it from the app's package.json,
 // which can be ahead of the binary that was actually shipped here.
 //
-// This is one of TWO version strings. The other is `softwareVersion` in
-// `layouts/BaseLayout.astro` (JSON-LD). Bump both together — they drifted once, and the
-// page advertised 0.3.0 while handing out a 0.3.1 binary.
-export const desktopVersion = '0.3.15';
+// This is the SINGLE source for the version: the hero pill, the download section, the
+// JSON-LD `softwareVersion` and the `.version` sidecar the self-updater reads all derive
+// from it. It used to be restated in `layouts/BaseLayout.astro`; the two drifted and the
+// page advertised 0.3.0 while handing out a 0.3.1 binary. Never add a second literal.
+export const desktopVersion = '0.3.17';
 
 /**
  * The Windows filename is FIXED, deliberately — it matches `build-all.mjs`'s
@@ -52,7 +53,7 @@ export const desktopSigned = false;
  *
  * Two ways to serve a build:
  *   `path` — served by this site out of `public/`. Only viable under Cloudflare's
- *            25 MiB per-file asset limit, which the 4.1 MB Windows build is well
+ *            25 MiB per-file asset limit, which the 4.2 MB Windows build is well
  *            inside. No external host, and the link works the moment the site deploys.
  *   `file` — a GitHub release asset on this repo, for anything too large for `path`.
  *            Pre-filled from the electron-builder `artifactName` config in the app repo
@@ -64,9 +65,9 @@ export const platforms = [
     name: 'Windows',
     icon: 'windows',
     detail: 'Windows 10 & 11 · 64-bit',
-    note: 'One 4.1 MB .exe — no installer, no admin rights. Uses the WebView2 runtime already on Windows 10 and 11.',
+    note: 'One 4.2 MB .exe — no installer, no admin rights. Uses the WebView2 runtime already on Windows 10 and 11.',
     path: `/download/${nativeWindowsFile}`,
-    size: '4.1 MB',
+    size: '4.2 MB',
     available: true,
     match: 'Windows',
   },

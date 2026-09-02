@@ -13,7 +13,7 @@
 > Tier A material — credentials, tokens, keys, `.env`/`.state` contents — was never
 > permitted at any visibility.
 
-Last updated: 2026-07-27.
+Last updated: 2026-09-01.
 
 ---
 
@@ -86,12 +86,18 @@ not the framing. Do not fold one back into the other.
 - **Deliberately unfinished:** macOS, Linux, Android and iOS are rendered as genuinely
   `disabled` buttons showing real status. That is not a placeholder; it is the honest state.
 
-Published Windows build: **0.3.15**, 4,268,544 bytes (**4.1 MB**), md5 `4b73ca50…`. Always
+Published Windows build: **0.3.17**, 4,413,952 bytes (**4.2 MB**), md5 `8fb2d51a…`. Always
 taken from the application repo's **per-version folder**, never the dist-root mirror — see
 `OPERATIONS.md` step 2 for why. On 2026-08-23 the mirror was six days stale and held the
 0.3.14 binary, while the dist root's own `version.json` said 0.3.15 and its `.version` file
 said 0.3.12 — three mutually inconsistent claims. The per-version folder was self-consistent
 and correct, as it always has been.
+
+On 2026-09-01 there was no per-version folder to take from at all: `build-all.mjs` had
+not been run for 0.3.17, `dist/0.3.16/` was an Electron-only orphan, and the only 0.3.17
+native binary was the raw Tauri output in `desktop-win/src-tauri/target/release/`. It was
+published from there because its FileVersion agreed with all three version files — see
+`OPERATIONS.md` step 2 for when that is acceptable and what it must be checked against.
 
 **Three files ship, not one:** the exe, `.md5`, and `.version`. The `.version` is what the
 self-updater acts on — a stale one silently freezes updates for every installed client, and
@@ -102,9 +108,10 @@ and the sidecar together. See `OPERATIONS.md` step 3.
 The stated size is not a constant: 0.3.6 shrank to 3.9 MB from 0.3.5's 4 MB and 0.3.10 grew
 back to 4.1 MB. Re-derive the rounding every time rather than assuming it held.
 
-Last verification (2026-07-27, against a served build): `_tools/verify.mjs` **50 passed,
-0 failed**; project-specific harness **51 passed, 0 failed**. Screenshots reviewed in dark,
-light and at 390px.
+Last verification (2026-09-01, against a served build): `_tools/verify.mjs` **51 passed,
+0 failed**; release checks **19 passed, 0 failed** — served exe byte-identical to the
+committed binary, md5 sidecar equal to the hash of the bytes actually served, `.version`
+sidecar served and reading 0.3.17, all three page version strings agreeing.
 
 ---
 
