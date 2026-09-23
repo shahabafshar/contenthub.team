@@ -144,6 +144,21 @@ committed one; git tracks content, not timestamps.)
    Do **not** take it from the application's `package.json` or `tauri.conf.json`
    — those can be ahead of the binary actually shipped here.
 
+   **A changed binary must carry a version newer than the one already published.**
+   The updater moves only when the published version is *strictly* greater than its
+   own (`version_gt` in `desktop-win/src-tauri/src/lib.rs`). Publish a rebuild under
+   the same number and new downloaders get the new bytes, but every installed client
+   compares, sees an equal version, reports "up to date", and never receives it. The
+   app's own `desktop/CHANGELOG.md` states the rule: *never ship two different
+   binaries with the same version*.
+
+   The tell: a fresh Tauri output whose md5 differs from the published one while its
+   FileVersion equals `desktopVersion`. On 2026-09-23 the attachments fix arrived
+   exactly that way, as a rebuilt 0.3.17. The fix is upstream — bump the version in
+   all three source files and rebuild — never here. Writing a higher number into
+   `desktopVersion` for a binary that reports the old one is worse than useless:
+   clients would download it, restart, still report the old version, and loop.
+
    `desktopVersion` is the single source: the hero pill, the download section and
    the JSON-LD `softwareVersion` all derive from it. That was not always true —
    `BaseLayout.astro` restated the version as its own literal, the two drifted,

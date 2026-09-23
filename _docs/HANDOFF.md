@@ -13,7 +13,7 @@
 > Tier A material — credentials, tokens, keys, `.env`/`.state` contents — was never
 > permitted at any visibility.
 
-Last updated: 2026-09-01.
+Last updated: 2026-09-23.
 
 ---
 
@@ -86,7 +86,7 @@ not the framing. Do not fold one back into the other.
 - **Deliberately unfinished:** macOS, Linux, Android and iOS are rendered as genuinely
   `disabled` buttons showing real status. That is not a placeholder; it is the honest state.
 
-Published Windows build: **0.3.17**, 4,413,952 bytes (**4.2 MB**), md5 `8fb2d51a…`. Always
+Published Windows build: **0.3.18**, 4,418,048 bytes (**4.2 MB**), md5 `1e4333da…`. Always
 taken from the application repo's **per-version folder**, never the dist-root mirror — see
 `OPERATIONS.md` step 2 for why. On 2026-08-23 the mirror was six days stale and held the
 0.3.14 binary, while the dist root's own `version.json` said 0.3.15 and its `.version` file
@@ -99,6 +99,16 @@ native binary was the raw Tauri output in `desktop-win/src-tauri/target/release/
 published from there because its FileVersion agreed with all three version files — see
 `OPERATIONS.md` step 2 for when that is acceptable and what it must be checked against.
 
+On 2026-09-23 a rebuilt Tauri binary carrying the attachments fix appeared with a new md5
+but the *same* FileVersion, 0.3.17, as the build already published. It was not published
+as-is: the updater moves only to a strictly newer version, so installed 0.3.17 clients would
+never have received it. With the user's approval the version was bumped to 0.3.18 in the
+application repo's three source files plus its `CHANGELOG.md`, the Tauri client was rebuilt
+(`npm run build:exe` in `desktop-win`), and that raw output was published under the same
+four-way check as 2026-09-01. Those app-repo edits were **left uncommitted** for the user to
+review, `build-all.mjs` was not run (so there is no `dist/0.3.18/` and no 0.3.18 Electron
+build), and the site docs cover the hazard in `OPERATIONS.md` step 5.
+
 **Three files ship, not one:** the exe, `.md5`, and `.version`. The `.version` is what the
 self-updater acts on — a stale one silently freezes updates for every installed client, and
 that has already happened once. Both sidecars are generated on `prebuild`, the `.md5` from
@@ -108,10 +118,11 @@ and the sidecar together. See `OPERATIONS.md` step 3.
 The stated size is not a constant: 0.3.6 shrank to 3.9 MB from 0.3.5's 4 MB and 0.3.10 grew
 back to 4.1 MB. Re-derive the rounding every time rather than assuming it held.
 
-Last verification (2026-09-01, against a served build): `_tools/verify.mjs` **51 passed,
+Last verification (2026-09-23, against a served build): `_tools/verify.mjs` **51 passed,
 0 failed**; release checks **19 passed, 0 failed** — served exe byte-identical to the
 committed binary, md5 sidecar equal to the hash of the bytes actually served, `.version`
-sidecar served and reading 0.3.17, all three page version strings agreeing.
+sidecar served and reading 0.3.18, all three page version strings agreeing, and neither
+the superseded version nor the superseded md5 anywhere in the served HTML.
 
 ---
 
@@ -246,6 +257,12 @@ Every one of these cost time or shipped a defect during the initial build.
   blocked by WebView2). This is a human-in-the-loop check and it gates what the calls
   section may claim.
 - **Code signing.** No certificates exist; builds are unsigned and the page says so.
+- **Commit the 0.3.18 bump in the application repo** (2026-09-23). The published binary was
+  built from uncommitted edits to `desktop/package.json`, `desktop/CHANGELOG.md`,
+  `desktop-win/src-tauri/tauri.conf.json` and `Cargo.toml` (plus the `Cargo.lock` line cargo
+  rewrote), left for the user to review. Until they are committed, the app repo's history
+  has no 0.3.18 and the next rebuild from a clean checkout would regress to 0.3.17. Running
+  `node build-all.mjs` afterwards would also give `desktop/dist/` a 0.3.18 folder.
 
 ---
 

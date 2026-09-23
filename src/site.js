@@ -20,7 +20,7 @@ const downloadBase = `${repoUrl}/releases/latest/download`;
 // JSON-LD `softwareVersion` and the `.version` sidecar the self-updater reads all derive
 // from it. It used to be restated in `layouts/BaseLayout.astro`; the two drifted and the
 // page advertised 0.3.0 while handing out a 0.3.1 binary. Never add a second literal.
-export const desktopVersion = '0.3.17';
+export const desktopVersion = '0.3.18';
 
 /**
  * The Windows filename is FIXED, deliberately — it matches `build-all.mjs`'s

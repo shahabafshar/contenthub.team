@@ -14,6 +14,33 @@ no local paths, internal hostnames or deployment topology. Tier A — credential
 
 ---
 
+## 2026-09-23 — A rebuild that reuses the published version is bumped upstream, not published
+
+The attachments fix arrived as a fresh Tauri binary whose md5 differed from the published
+0.3.17 while its FileVersion was still 0.3.17. The self-updater moves only when the published
+`.version` is *strictly* newer than its own, so publishing those bytes as 0.3.17 would have
+reached new downloaders and no one else: every installed client would compare 0.3.17 with
+0.3.17 and report itself up to date. The application's own `desktop/CHANGELOG.md` forbids
+exactly this: *never ship two different binaries with the same version*.
+
+**Decided (by the user, when asked):** bump the version to 0.3.18 in the application repo's
+three source files, add a CHANGELOG entry, rebuild, and publish that. The app-repo edits were
+left uncommitted for the user to review; this repo only published the result.
+
+**Rejected:**
+
+- *Publish the rebuild as 0.3.17.* It would be silently undeliverable to existing installs,
+  which are exactly the users who hit the attachments bug.
+- *Write 0.3.18 into `desktopVersion` over a binary that reports 0.3.17.* Clients would see
+  a newer `.version`, download, restart, still report 0.3.17, and loop. It would also make
+  the page claim a version the binary does not carry (MANIFEST §1.5).
+- *Leave 0.3.17 published and wait for a real release.* That would work, but it holds back
+  a fix that is already built, for no gain.
+
+The tell and the procedure are in `OPERATIONS.md` step 5.
+
+---
+
 ## 2026-07-28 — Desktop builds are taken from the per-version folder, not the dist mirror
 
 Publishing 0.3.5 turned up a trap in the runbook. The application repo's build script keeps
