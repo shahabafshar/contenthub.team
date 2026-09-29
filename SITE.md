@@ -247,9 +247,6 @@ Reasoning for the choices below lives in [`_docs/DECISIONS.md`](_docs/DECISIONS.
 traps that break things live in [`_docs/HANDOFF.md`](_docs/HANDOFF.md). What follows is only
 what is unverified or pending.
 
-- **`contenthub.team` does not resolve yet**, and the site has never been deployed —
-  Cloudflare is not connected. The absolute URLs in meta and JSON-LD are correct for when it
-  is, but no social preview or canonical will work until then.
 - **Calls in the published Windows client are unverified.** Its own README flags WebView2
   camera/microphone permission as the first thing to check. This gates what the calls section
   may claim and needs a human to test.

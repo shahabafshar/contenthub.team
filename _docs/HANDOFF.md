@@ -13,7 +13,7 @@
 > Tier A material — credentials, tokens, keys, `.env`/`.state` contents — was never
 > permitted at any visibility.
 
-Last updated: 2026-09-23.
+Last updated: 2026-09-28.
 
 ---
 
@@ -46,15 +46,16 @@ site** — see `DECISIONS.md`. It is not a public sign-up destination. Nothing i
 references it; if a public instance ever exists, put it in `src/site.js`, never inline in a
 component.
 
-**`contenthub.team` does not resolve yet.** Do not link to it as though it were live; the
-absolute URLs in meta/JSON-LD are correct for when it is.
+**`contenthub.team` is live** (confirmed 2026-09-28: the apex serves the page and the 0.3.20
+download byte-for-byte, `/download/*` carries `max-age=300`, and `/_docs/` is a 404). `www.`
+does not resolve; the apex is the canonical host.
 
 ---
 
 ## Current state
 
-The site is complete, verified and pushed. It has never been deployed, because Cloudflare
-is not connected yet (see *Blocked on the user*).
+The site is complete, verified, pushed and live. Cloudflare deploys it from `main`, so a
+push is a release — including of the Windows binary and its sidecars.
 
 One page plus a 404, in this order: hero → the chat demo → the release note it produced →
 **the AI assistant** → calls → mixed scripts → features → self-hosting → download.
@@ -86,7 +87,7 @@ not the framing. Do not fold one back into the other.
 - **Deliberately unfinished:** macOS, Linux, Android and iOS are rendered as genuinely
   `disabled` buttons showing real status. That is not a placeholder; it is the honest state.
 
-Published Windows build: **0.3.18**, 4,418,048 bytes (**4.2 MB**), md5 `1e4333da…`. Always
+Published Windows build: **0.3.20**, 4,438,528 bytes (**4.2 MB**), md5 `337dd1b3…`. Always
 taken from the application repo's **per-version folder**, never the dist-root mirror — see
 `OPERATIONS.md` step 2 for why. On 2026-08-23 the mirror was six days stale and held the
 0.3.14 binary, while the dist root's own `version.json` said 0.3.15 and its `.version` file
@@ -109,6 +110,10 @@ four-way check as 2026-09-01. Those app-repo edits were **left uncommitted** for
 review, `build-all.mjs` was not run (so there is no `dist/0.3.18/` and no 0.3.18 Electron
 build), and the site docs cover the hazard in `OPERATIONS.md` step 5.
 
+0.3.19 and 0.3.20 (2026-09-28) went back to the normal path: `build-all.mjs` had been run,
+and the per-version folder, the mirror and the raw Tauri output were byte-identical and all
+reported the version in the three source files, which by then were committed.
+
 **Three files ship, not one:** the exe, `.md5`, and `.version`. The `.version` is what the
 self-updater acts on — a stale one silently freezes updates for every installed client, and
 that has already happened once. Both sidecars are generated on `prebuild`, the `.md5` from
@@ -118,10 +123,10 @@ and the sidecar together. See `OPERATIONS.md` step 3.
 The stated size is not a constant: 0.3.6 shrank to 3.9 MB from 0.3.5's 4 MB and 0.3.10 grew
 back to 4.1 MB. Re-derive the rounding every time rather than assuming it held.
 
-Last verification (2026-09-23, against a served build): `_tools/verify.mjs` **51 passed,
+Last verification (2026-09-28, against a served build): `_tools/verify.mjs` **51 passed,
 0 failed**; release checks **19 passed, 0 failed** — served exe byte-identical to the
 committed binary, md5 sidecar equal to the hash of the bytes actually served, `.version`
-sidecar served and reading 0.3.18, all three page version strings agreeing, and neither
+sidecar served and reading 0.3.20, all three page version strings agreeing, and neither
 the superseded version nor the superseded md5 anywhere in the served HTML.
 
 ---
@@ -191,10 +196,16 @@ Every one of these cost time or shipped a defect during the initial build.
    layouts stop looking different, and the comparison demonstrates nothing.
 8. **Computed `direction` is not proof anything moved.** Measure where the ink actually
    starts with a `Range`, or you will assert a passing test over a broken layout.
-9. **Do not describe the Electron client's features.** The published build is the Tauri one.
-   It has no unread badge, no notification cards, no deep links, no start-at-login, no
-   auto-update, and no hub picker — and its own README flags WebView2 camera/microphone
-   permission as unverified, so **calls in this build are unconfirmed**.
+9. **Describe the Tauri client, not the Electron one.** The published build is the Tauri
+   one, and `desktop/CHANGELOG.md` mixes both — 0.3.0's frameless notification cards and
+   Focus Assist check are Electron's. Check claims against `desktop-win/src-tauri/src/lib.rs`.
+   Since this hazard was first written (2026-07-26) the Tauri client has gained a tray and
+   taskbar unread badge, native Windows notifications (sender's face, inline photo, meeting
+   reminders that stay on screen), `contenthub://` deep links, start-at-login and a
+   self-updater. It still has **no hub picker** — the address is baked in, overridable only
+   by an environment variable — and its README still flags WebView2 camera/microphone
+   permission as unverified, so **calls in this build are unconfirmed**. Re-read `lib.rs`
+   when a release note mentions the desktop client; this list goes stale.
 10. **Do not claim localisation.** There is no i18n library and no locale catalogues. The
    mixed-script section is about the text a team writes, and says so explicitly.
 11. **Do not claim anything from the app's unstarted enterprise phase** — audit trails,
@@ -247,38 +258,22 @@ Every one of these cost time or shipped a defect during the initial build.
 
 ## Blocked on the user — do not retry these
 
-- **Register `contenthub.team`** and add it to the Cloudflare account. It does not resolve
-  today; only `slideroo.io` is on that account.
-- **Connect this repo in Cloudflare Workers Builds.** Settings are in `../SITE.md` § Deploy.
-  **Name the Worker `contenthub-team`, not `contenthub.team`** — `wrangler.jsonc` declares
-  the hyphenated name and `wrangler deploy` ignores the dashboard's, so a mismatch deploys
-  to a different Worker than the project being created.
 - **Verify calls in the Tauri build** (log in, start a call, check camera/mic are not
   blocked by WebView2). This is a human-in-the-loop check and it gates what the calls
   section may claim.
 - **Code signing.** No certificates exist; builds are unsigned and the page says so.
-- **Commit the 0.3.18 bump in the application repo** (2026-09-23). The published binary was
-  built from uncommitted edits to `desktop/package.json`, `desktop/CHANGELOG.md`,
-  `desktop-win/src-tauri/tauri.conf.json` and `Cargo.toml` (plus the `Cargo.lock` line cargo
-  rewrote), left for the user to review. Until they are committed, the app repo's history
-  has no 0.3.18 and the next rebuild from a clean checkout would regress to 0.3.17. Running
-  `node build-all.mjs` afterwards would also give `desktop/dist/` a 0.3.18 folder.
 
 ---
 
 ## Next steps, ranked
 
-1. **Cloudflare connection and domain**, so the site is actually live and the download URL
-   resolves. Everything else is cosmetic until then.
-2. **Confirm WebView2 call permission.** If calls are blocked in the published client, the
+1. **Confirm WebView2 call permission.** If calls are blocked in the published client, the
    calls section needs a caveat, or the permission handler needs adding upstream.
-3. **A hub picker in the Tauri build.** Until the hub address is configurable, the download
+2. **A hub picker in the Tauri build.** Until the hub address is configurable, the download
    is not usable by another team self-hosting — which sits awkwardly against the rest of
    the page's pitch. This is the single change that would most improve the site's honesty.
-4. **macOS and Linux**: sign and notarise, attach to a release on this repo, then flip
+3. **macOS and Linux**: sign and notarise, attach to a release on this repo, then flip
    `available` in `src/site.js`. The filenames are already pre-filled.
-5. **Consider a `version.json` beside the MD5.** The hash detects *change*, not *ordering*;
-   a rollback currently looks identical to an update.
 
 ---
 

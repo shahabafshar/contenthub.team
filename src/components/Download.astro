@@ -23,7 +23,7 @@ const primaryChecksum = primaryPlatform ? checksumUrl(primaryPlatform) : null;
         A real application rather than a browser tab, and a small one: it renders through
         the WebView2 runtime Windows already ships with instead of carrying its own copy
         of Chromium, so the whole download is 4.2 MB. It runs as a single instance, keeps
-        a tray icon, and needs no installer.
+        a tray icon with your unread count, and needs no installer.
       </p>
     </div>
 
@@ -71,8 +71,8 @@ const primaryChecksum = primaryPlatform ? checksumUrl(primaryPlatform) : null;
       <p>
         <strong>Version {desktopVersion}</strong> — an early release, still on a
         <code>0.x</code> version for a reason. It connects to a hub address set when the
-        build is made; choosing your own hub from the app is on the way, along with unread
-        badges and notification cards. <a href={releasesUrl}>Releases on GitHub</a>.
+        build is made, and choosing your own hub from the app is on the way. It updates
+        itself when a new build is published here. <a href={releasesUrl}>Releases on GitHub</a>.
       </p>
       {
         !desktopSigned && (

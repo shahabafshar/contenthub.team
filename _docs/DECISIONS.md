@@ -14,6 +14,33 @@ no local paths, internal hostnames or deployment topology. Tier A — credential
 
 ---
 
+## 2026-09-28 — Desktop copy catches up with the Tauri client
+
+The 2026-07-26 entry (*Publish the 2.6 MB Tauri build*) cut every desktop claim the Tauri
+build could not back: no unread badge, no notification cards, no deep links, no
+auto-update, no hub picker. That entry stands; what it described did not. By 0.3.20 the
+Tauri client has a tray and taskbar unread badge, native Windows notifications with the
+sender's face and meeting reminders that stay on screen, `contenthub://` deep links,
+start-at-login and a self-updater — all checked in its own source, not the changelog.
+
+Two sentences had gone wrong in opposite directions:
+
+- **Download section:** "choosing your own hub from the app is on the way, along with unread
+  badges and notification cards" understated the shipped client. Now it says what is still
+  missing (the hub picker) and what it does (updates itself; the tray carries the unread count).
+- **Features:** "The desktop client draws its own notification cards and honours Windows
+  Focus Assist" described the *Electron* client — its frameless cards and its
+  `SHQueryUserNotificationState` check. It survived the July purge. Now it describes the
+  Tauri client's native notifications.
+
+**Rejected:** claiming Accept/Decline on call notifications. The toast has those buttons,
+but calls in this build are still unverified (HANDOFF hazard 9), so the page does not lead
+anyone to expect a call to work. Rejected: restoring the Focus Assist sentence for native
+toasts. Windows does apply Focus Assist to them, but reminder and call toasts can break
+through depending on the user's settings, and "honours" would overstate it.
+
+---
+
 ## 2026-09-23 — A rebuild that reuses the published version is bumped upstream, not published
 
 The attachments fix arrived as a fresh Tauri binary whose md5 differed from the published
