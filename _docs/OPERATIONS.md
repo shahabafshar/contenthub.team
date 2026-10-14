@@ -8,6 +8,26 @@ DECISIONS 2026-07-26).
 
 ---
 
+## Two sites, one build (since 0.4.0)
+
+The product was renamed **Divan**, and from 0.4.0 the Windows client looks for its
+updates on **divan.team** — `/download/Divan.exe`, with `Divan.exe.md5` and
+`Divan.exe.version` beside it. divan.team is now the main site.
+
+This site still publishes every build, **byte-identical, under the old name**
+`ContentHub-Native.exe`, because clients older than 0.4.0 poll here and nowhere else.
+They take it, restart as 0.4.x, and from then on poll divan.team. The 0.4.x client
+accepts either filename as its own, so a copy installed under the old name keeps
+updating.
+
+- **Publish to divan.team first** — that is where current clients look — then here.
+  divan.team's own `_docs/HANDOFF.md` (*The Windows client*) covers its side; its
+  sidecars are written by hand, not generated.
+- **The two must carry the same bytes and the same version.** Check both over HTTP.
+- **Never retire or redirect this site's three download URLs.** A blanket redirect to
+  divan.team would strand every pre-0.4.0 client: it would ask for
+  `ContentHub-Native.exe.version` and get a page.
+
 ## Publishing a new Windows build
 
 This is the procedure. It has exactly one manual step, and one trap that has
@@ -34,10 +54,19 @@ committed one; git tracks content, not timestamps.)
    with a matching `.md5`, and prints the size.
 
 2. **Copy the binary from the per-version folder** —
-   `desktop/dist/<version>/ContentHub-Native.exe` — into
-   `public/download/ContentHub-Native.exe`. Keep that exact filename: the URL is
-   linked from outside this site and installed clients poll it, so it must never
+   `desktop/dist/<version>/ContentHub-Native.exe`, or from 0.4.1 on
+   `desktop/dist/<version>/Divan.exe` — into
+   `public/download/ContentHub-Native.exe`. Keep that exact filename *here*: the URL is
+   linked from outside this site and pre-0.4.0 clients poll it, so it must never
    gain a version or change name (hazard 2).
+
+   **From 0.4.0 the version check changed.** The Electron shell's
+   `desktop/package.json` stopped moving with the Tauri client (it stayed at 0.3.21),
+   so check the binary's FileVersion against `desktop-win/src-tauri/tauri.conf.json`
+   and `Cargo.toml` only — and in *the tree that built it*, which is not always the
+   shared checkout (0.4.1 was built in a side worktree; find it with
+   `git log --all -- desktop-win/src-tauri/tauri.conf.json`). The dist-root mirror kept
+   the old filename and lagged again: it still held 0.4.0 after 0.4.1 was out.
 
    **Do not copy from the mirror at `desktop/dist/ContentHub-Native.exe`.** It is
    meant to hold the latest build, but it has been observed holding the *previous*

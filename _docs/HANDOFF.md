@@ -13,7 +13,7 @@
 > Tier A material — credentials, tokens, keys, `.env`/`.state` contents — was never
 > permitted at any visibility.
 
-Last updated: 2026-09-28.
+Last updated: 2026-10-14.
 
 ---
 
@@ -57,6 +57,14 @@ does not resolve; the apex is the canonical host.
 The site is complete, verified, pushed and live. Cloudflare deploys it from `main`, so a
 push is a release — including of the Windows binary and its sidecars.
 
+**The product is now Divan, and `divan.team` is the main site** (renamed 2026-10-10; the
+owner, 2026-10-14: "from now on divan.team is the main repo"). From 0.4.0 the Windows client
+looks for its updates on divan.team. This site still matters for one job: clients older than
+0.4.0 poll *this* site, so every build is published here too, byte-identical, under the old
+name. See `OPERATIONS.md` § *Two sites, one build*. The page itself still presents ContentHub
+as a chat app; what happens to it is the owner's to say — but whatever happens, the three
+download URLs must keep serving.
+
 One page plus a 404, in this order: hero → the chat demo → the release note it produced →
 **the AI assistant** → calls → mixed scripts → features → self-hosting → download.
 
@@ -87,7 +95,8 @@ not the framing. Do not fold one back into the other.
 - **Deliberately unfinished:** macOS, Linux, Android and iOS are rendered as genuinely
   `disabled` buttons showing real status. That is not a placeholder; it is the honest state.
 
-Published Windows build: **0.3.20**, 4,438,528 bytes (**4.2 MB**), md5 `337dd1b3…`. Always
+Published Windows build: **0.4.1**, 4,454,400 bytes (**4.2 MB**), md5 `ea93fc2c…` — the same
+bytes as `divan.team/download/Divan.exe`. Before 0.4.0, always
 taken from the application repo's **per-version folder**, never the dist-root mirror — see
 `OPERATIONS.md` step 2 for why. On 2026-08-23 the mirror was six days stale and held the
 0.3.14 binary, while the dist root's own `version.json` said 0.3.15 and its `.version` file
@@ -114,6 +123,13 @@ build), and the site docs cover the hazard in `OPERATIONS.md` step 5.
 and the per-version folder, the mirror and the raw Tauri output were byte-identical and all
 reported the version in the three source files, which by then were committed.
 
+0.4.0 (2026-10-12) and 0.4.1 (2026-10-14) are the Divan builds, published here and on
+divan.team by another session. The per-version folder now holds `Divan.exe`, not
+`ContentHub-Native.exe`; the dist-root mirror kept the old name and still held 0.4.0 after
+0.4.1 was out. 0.4.1 was built in a side worktree of the app repo, not the shared checkout,
+and the Electron shell's `desktop/package.json` stayed at 0.3.21 — `OPERATIONS.md` step 2
+says what to check instead.
+
 **Three files ship, not one:** the exe, `.md5`, and `.version`. The `.version` is what the
 self-updater acts on — a stale one silently freezes updates for every installed client, and
 that has already happened once. Both sidecars are generated on `prebuild`, the `.md5` from
@@ -122,6 +138,11 @@ and the sidecar together. See `OPERATIONS.md` step 3.
 
 The stated size is not a constant: 0.3.6 shrank to 3.9 MB from 0.3.5's 4 MB and 0.3.10 grew
 back to 4.1 MB. Re-derive the rounding every time rather than assuming it held.
+
+Last verification of 0.4.1 (2026-10-14, against both live sites): the exe, `.md5` and `.version`
+are served byte-identical on contenthub.team and divan.team, the digest equals the hash of the
+bytes served, `.version` reads 0.4.1, and this page's three version strings agree. The
+verification below is the last one run against a local build.
 
 Last verification (2026-09-28, against a served build): `_tools/verify.mjs` **51 passed,
 0 failed**; release checks **19 passed, 0 failed** — served exe byte-identical to the

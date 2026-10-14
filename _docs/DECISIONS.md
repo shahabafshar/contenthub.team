@@ -14,6 +14,26 @@ no local paths, internal hostnames or deployment topology. Tier A — credential
 
 ---
 
+## 2026-10-14 — divan.team is the client's home; this site keeps publishing for older clients
+
+ContentHub was renamed Divan (2026-10-10), and from 0.4.0 the Windows client looks for its
+updates on divan.team as `Divan.exe`. The owner said on 2026-10-14 that divan.team is now the
+main repo. 0.4.0 and 0.4.1 were published to both sites by another session without a note
+here; this records the arrangement.
+
+**Decided:** every build goes to both sites with identical bytes — divan.team as `Divan.exe`
+(where 0.4.0 and later clients look), and this site as `ContentHub-Native.exe` (where older
+clients still look, and from which they move over). The three download URLs here stay up
+whatever becomes of the page.
+
+**Rejected:** stopping releases here once divan.team had them. A pre-0.4.0 client only ever
+asks this site; if this site's `.version` froze at the last 0.3.x, those clients would report
+themselves up to date forever. Rejected: redirecting this site wholesale to divan.team — the
+client fetches `ContentHub-Native.exe.version` as text and compares it as a version, so a
+redirect to a page is the same as a missing file.
+
+---
+
 ## 2026-09-28 — Desktop copy catches up with the Tauri client
 
 The 2026-07-26 entry (*Publish the 2.6 MB Tauri build*) cut every desktop claim the Tauri
