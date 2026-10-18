@@ -13,7 +13,7 @@
 > Tier A material — credentials, tokens, keys, `.env`/`.state` contents — was never
 > permitted at any visibility.
 
-Last updated: 2026-10-14.
+Last updated: 2026-10-17.
 
 ---
 
@@ -95,8 +95,10 @@ not the framing. Do not fold one back into the other.
 - **Deliberately unfinished:** macOS, Linux, Android and iOS are rendered as genuinely
   `disabled` buttons showing real status. That is not a placeholder; it is the honest state.
 
-Published Windows build: **0.4.1**, 4,454,400 bytes (**4.2 MB**), md5 `ea93fc2c…` — the same
-bytes as `divan.team/download/Divan.exe`. Before 0.4.0, always
+Published Windows build: **0.4.2**, 4,463,104 bytes (**4.3 MB**), md5 `e64b9814…` — the same
+bytes as `divan.team/download/Divan.exe`. It is the first build with Divan's new icon (the
+"peek"); all six sizes of the new `icon.ico` are embedded in the published exe and none of the
+old one, checked byte-for-byte on 2026-10-17. Before 0.4.0, always
 taken from the application repo's **per-version folder**, never the dist-root mirror — see
 `OPERATIONS.md` step 2 for why. On 2026-08-23 the mirror was six days stale and held the
 0.3.14 binary, while the dist root's own `version.json` said 0.3.15 and its `.version` file
@@ -136,12 +138,14 @@ that has already happened once. Both sidecars are generated on `prebuild`, the `
 the bytes and the `.version` from `desktopVersion`, so bumping the version updates the page
 and the sidecar together. See `OPERATIONS.md` step 3.
 
-The stated size is not a constant: 0.3.6 shrank to 3.9 MB from 0.3.5's 4 MB and 0.3.10 grew
-back to 4.1 MB. Re-derive the rounding every time rather than assuming it held.
+The stated size is not a constant: 0.3.6 shrank to 3.9 MB from 0.3.5's 4 MB, 0.3.10 grew
+back to 4.1 MB, and 0.4.2 crossed to 4.3 MB. Re-derive the rounding every time rather than
+assuming it held.
 
-Last verification of 0.4.1 (2026-10-14, against both live sites): the exe, `.md5` and `.version`
+Last verification of 0.4.2 (2026-10-17, against both live sites): the exe, `.md5` and `.version`
 are served byte-identical on contenthub.team and divan.team, the digest equals the hash of the
-bytes served, `.version` reads 0.4.1, and this page's three version strings agree. The
+bytes served, `.version` reads 0.4.2, this page's three version strings agree, and it states
+4.3 MB in all four places. The
 verification below is the last one run against a local build.
 
 Last verification (2026-09-28, against a served build): `_tools/verify.mjs` **51 passed,
